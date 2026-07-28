@@ -245,7 +245,7 @@ with tab2:
                     "Status Receita": r.situacao_cadastral or "---",
                     "Cód. Fantasia": r.cod_anunc_fantasia,
                     "Nome Fantasia": r.anunciante_fantasia,
-                    "É Matriz?": "Sim (/0001)" if r.eh_matriz is True else ("Não (Filial)" if r.eh_matriz is False else "---"),
+                    "É CNPJ Raiz (Matriz)?": "Verdadeiro" if r.eh_matriz is True else ("Falso" if r.eh_matriz is False else "---"),
                     "Status Validação": r.status_validacao,
                     "Divergência / Alerta": r.tipo_divergencia or "Nenhuma",
                     "Última Atualização": r.data_ultima_atualizacao.strftime("%d/%m/%Y %H:%M") if r.data_ultima_atualizacao else "---"
@@ -384,7 +384,7 @@ with tab3:
                     st.write(f"**Razão Social:** {item_atual.anunciante_rz_social}")
                     st.write(f"**Nome Fantasia:** {item_atual.anunciante_fantasia} (Cód: {item_atual.cod_anunc_fantasia})")
                     st.write(f"**CNPJ Atual:** {item_atual.cnpj_formatado or item_atual.cnpj_original}")
-                    st.write(f"**É Matriz?:** {item_atual.eh_matriz}")
+                    st.write(f"**É CNPJ Raiz (Matriz)?:** {'Verdadeiro' if item_atual.eh_matriz is True else ('Falso' if item_atual.eh_matriz is False else '---')}")
 
                 with col_d2:
                     st.markdown("#### 🏢 Diagnóstico da Receita & Recomendação")
@@ -480,7 +480,7 @@ with tab4:
                     "Anunciante Fantasia": a.anunciante_fantasia,
                     "Status Validação": a.status_validacao,
                     "Situação Receita": a.situacao_cadastral,
-                    "Matriz?": "SIM" if a.eh_matriz else ("NÃO" if a.eh_matriz is False else "ISENTO"),
+                    "É CNPJ Raiz (Matriz)?": "Verdadeiro" if a.eh_matriz is True else ("Falso" if a.eh_matriz is False else "Isento"),
                     "Razão Social Receita": a.razao_social_receita or "",
                     "Data Última Atualização": a.data_ultima_atualizacao.strftime("%Y-%m-%d %H:%M:%S") if a.data_ultima_atualizacao else ""
                 })
@@ -550,7 +550,7 @@ with tab4:
         if test_cnpj_input:
             is_v, c_clean, reason = validate_cnpj(test_cnpj_input)
             if is_v:
-                st.success(f"✅ **VÁLIDO!** CNPJ Formatado: `{format_cnpj(c_clean)}` | É Matriz?: `{is_matriz(c_clean)}`")
+                st.success(f"✅ **VÁLIDO!** CNPJ Formatado: `{format_cnpj(c_clean)}` | É CNPJ Raiz (Matriz)?: `{'Verdadeiro' if is_matriz(c_clean) is True else ('Falso' if is_matriz(c_clean) is False else '---')}`")
             else:
                 st.error(f"❌ **INVÁLIDO!** Motivo: {reason}")
 
