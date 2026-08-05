@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pielsen - Portal de Reconciliação e Feedback (PoC)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+    .glass-card { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    .nav-tab.active { border-bottom: 3px solid #0284c7; color: #38bdf8; font-weight: 600; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+
+  <!-- Top Bar / Header -->
+  <header class="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex flex-wrap items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2">
+        <span class="text-2xl font-black tracking-wider text-sky-400">pielsen</span>
+        <span class="text-xs bg-sky-950 text-sky-300 px-2.5 py-0.5 rounded border border-sky-800 font-semibold" data-i18n="portalTitle">Reconciliation Portal v1.0</span>
+      </div>
+      <div class="h-5 w-px bg-slate-700 hidden sm:block"></div>
+      <!-- Dropdown de Ciclo de Entrega -->
+      <div class="flex items-center space-x-2 text-xs">
+        <span class="text-slate-400 font-medium"><i class="fa-solid fa-arrows-rotate mr-1"></i><span data-i18n="cycleLabel">Ciclo:</span></span>
+        <select id="cycleSelector" onchange="loadCurrentTab()" class="bg-slate-800 text-slate-200 text-xs rounded border border-slate-700 px-2 py-1 focus:outline-none focus:border-sky-500">
+          <option value="" data-i18n="allCycles">Todos os Ciclos</option>
+          <option value="Initial Delivery">Initial Delivery</option>
+          <option value="First Redelivery">First Redelivery</option>
+          <option value="Final Redelivery">Final Redelivery</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-4 mt-2 sm:mt-0">
+      <!-- Indicador de Deadline/SLA -->
+      <div class="bg-amber-950/60 border border-amber-800/80 px-3 py-1 rounded text-xs flex items-center space-x-2 text-amber-300">
+        <i class="fa-solid fa-clock text-amber-400 animate-pulse"></i>
+        <span><span data-i18n="slaClosesIn">SLA Fecha em:</span> <strong id="countdownTimer">04h 28m 12s</strong></span>
+      </div>
+
+      <!-- Simulação de Perfil de Usuário -->
+      <div class="flex items-center space-x-2 text-xs bg-slate-800 px-2.5 py-1 rounded border border-slate-700">
+        <i class="fa-solid fa-user-circle text-sky-400"></i>
+        <span class="text-slate-400" data-i18n="profileLabel">Perfil:</span>
+        <select id="roleSimulator" class="bg-transparent text-slate-200 text-xs font-semibold focus:outline-none cursor-pointer">
+          <option value="Ops" class="bg-slate-900 text-slate-200">Pielsen Ops Admin</option>
+          <option value="Globo" class="bg-slate-900 text-slate-200">Broadcaster (TV Globo)</option>
+          <option value="Agency" class="bg-slate-900 text-slate-200">Sales House / Agência</option>
+        </select>
+      </div>
+
+      <!-- Seletor de Idioma -->
+      <div class="flex items-center space-x-2 text-xs bg-slate-800 px-2.5 py-1 rounded border border-sky-600/50 hover:border-sky-400 transition">
+        <i class="fa-solid fa-globe text-sky-400"></i>
+        <span class="text-slate-400" data-i18n="langLabel">Idioma:</span>
+        <select id="langSelector" onchange="changeLanguage(this.value)" class="bg-transparent text-slate-200 text-xs font-semibold focus:outline-none cursor-pointer">
+          <option value="pt" class="bg-slate-900 text-slate-200">PT 🇧🇷</option>
+          <option value="en" class="bg-slate-900 text-slate-200">EN 🇺🇸</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="bg-slate-900/80 border-b border-slate-800 px-6 flex space-x-8 text-sm text-slate-400 overflow-x-auto">
+    <button onclick="switchTab('new-programmes')" id="tab-new-programmes" class="nav-tab py-3.5 flex items-center space-x-2 whitespace-nowrap active">
+      <i class="fa-solid fa-sparkles"></i>
+      <span data-i18n="tab1">1. Novos Programas</span>
+      <span id="badge-new-prog" class="ml-1 px-2 py-0.5 text-xs bg-sky-900 text-sky-200 rounded-full font-bold">3</span>
+    </button>
+    <button onclick="switchTab('prog-differences')" id="tab-prog-differences" class="nav-tab py-3.5 flex items-center space-x-2 whitespace-nowrap">
+      <i class="fa-solid fa-code-compare"></i>
+      <span data-i18n="tab2">2. Divergências de Grade</span>
+      <span id="badge-diff-prog" class="ml-1 px-2 py-0.5 text-xs bg-amber-900 text-amber-200 rounded-full font-bold">6</span>
+    </button>
+    <button onclick="switchTab('all-programmes')" id="tab-all-programmes" class="nav-tab py-3.5 flex items-center space-x-2 whitespace-nowrap">
+      <i class="fa-solid fa-list-check"></i>
+      <span data-i18n="tab3">3. Manutenção de Programas</span>
+    </button>
+    <button onclick="switchTab('spot-differences')" id="tab-spot-differences" class="nav-tab py-3.5 flex items-center space-x-2 whitespace-nowrap">
+      <i class="fa-solid fa-rectangle-ad"></i>
+      <span data-i18n="tab4">4. Reconciliação de Spots</span>
+      <span id="badge-diff-spots" class="ml-1 px-2 py-0.5 text-xs bg-rose-900 text-rose-200 rounded-full font-bold">4</span>
+    </button>
+    <button onclick="switchTab('kpi-dashboard')" id="tab-kpi-dashboard" class="nav-tab py-3.5 flex items-center space-x-2 whitespace-nowrap">
+      <i class="fa-solid fa-chart-line"></i>
+      <span data-i18n="tab5">5. KPIs & Relatórios</span>
+    </button>
+  </nav>
+
+  <!-- Sub-Header / Filters -->
+  <div class="bg-slate-900/40 border-b border-slate-800/80 px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex flex-wrap items-center gap-3 text-xs">
+      <div class="flex items-center space-x-2">
+        <label class="text-slate-400" data-i18n="channelLabel">Canal:</label>
+        <select id="channelFilter" onchange="loadCurrentTab()" class="bg-slate-800 text-slate-200 rounded border border-slate-700 px-2.5 py-1 focus:outline-none">
+          <option value="" data-i18n="allChannels">Todos os Canais</option>
+        </select>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <label class="text-slate-400" data-i18n="statusLabel">Status:</label>
+        <select id="statusFilter" onchange="loadCurrentTab()" class="bg-slate-800 text-slate-200 rounded border border-slate-700 px-2.5 py-1 focus:outline-none">
+          <option value="" data-i18n="allStatuses">Todos os Status</option>
+          <option value="New">New</option>
+          <option value="Open">Open</option>
+          <option value="Accepted">Accepted</option>
+          <option value="Feedback Submitted">Feedback Submitted</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="flex items-center space-x-2">
+      <button onclick="exportData('csv')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded border border-slate-700 flex items-center space-x-1.5 transition">
+        <i class="fa-solid fa-file-csv text-emerald-400"></i>
+        <span data-i18n="exportCsv">Exportar CSV</span>
+      </button>
+      <button onclick="exportData('excel')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs rounded border border-slate-700 flex items-center space-x-1.5 transition">
+        <i class="fa-solid fa-file-excel text-emerald-500"></i>
+        <span data-i18n="exportExcel">Exportar Excel</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 p-6 max-w-7xl w-full mx-auto">
+
+    <!-- 1. ABA: NOVOS PROGRAMAS -->
+    <section id="sec-new-programmes" class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-white" data-i18n="sec1Title">Relatório de Novos Programas Identificados</h2>
+          <p class="text-xs text-slate-400" data-i18n="sec1Sub">Validação de metadados e títulos harmonizados de programas recém-detectados pelo monitoramento.</p>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-xl overflow-hidden border border-slate-800">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/90 text-slate-400 uppercase font-semibold border-b border-slate-800">
+              <tr>
+                <th class="p-3" data-i18n="thChannel">Canal</th>
+                <th class="p-3" data-i18n="thDateTime">Data / Horário</th>
+                <th class="p-3" data-i18n="thCapturedTitle">Título Capturado (Original)</th>
+                <th class="p-3" data-i18n="thHarmonizedTitle">Título Harmonizado Proposto</th>
+                <th class="p-3" data-i18n="thCategory">Categoria / Gênero</th>
+                <th class="p-3" data-i18n="thStatus">Status</th>
+                <th class="p-3 text-right" data-i18n="thActions">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-new-programmes" class="divide-y divide-slate-800/60">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. ABA: DIVERGÊNCIAS DE GRADE -->
+    <section id="sec-prog-differences" class="space-y-4 hidden">
+      <div>
+        <h2 class="text-lg font-bold text-white" data-i18n="sec2Title">Relatório de Divergências de Grade (TV & Rádio)</h2>
+        <p class="text-xs text-slate-400" data-i18n="sec2Sub">Comparação entre os arquivos da emissora (Programme Before) e a saída monitorada.</p>
+      </div>
+
+      <div class="glass-card rounded-xl overflow-hidden border border-slate-800">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/90 text-slate-400 uppercase font-semibold border-b border-slate-800">
+              <tr>
+                <th class="p-3" data-i18n="thChannel">Canal</th>
+                <th class="p-3" data-i18n="thTime">Horário</th>
+                <th class="p-3" data-i18n="thPlannedGrid">Grade Prevista (Programme Before)</th>
+                <th class="p-3" data-i18n="thMonitoredGrid">Efetivamente Monitorado</th>
+                <th class="p-3" data-i18n="thDiffType">Tipo de Divergência</th>
+                <th class="p-3" data-i18n="thStatus">Status</th>
+                <th class="p-3 text-right" data-i18n="thActions">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-prog-differences" class="divide-y divide-slate-800/60">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. ABA: MANUTENÇÃO DE PROGRAMAS -->
+    <section id="sec-all-programmes" class="space-y-4 hidden">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-white" data-i18n="sec3Title">Manutenção Geral de Programas Entregues</h2>
+          <p class="text-xs text-slate-400" data-i18n="sec3Sub">Edição de metadados permissíveis (Chave de Reconciliação, Subtítulo, Código de Repetição).</p>
+        </div>
+        <input type="text" id="searchInputAll" onkeyup="loadAllProgrammes()" data-i18n-ph="searchPlaceholder" placeholder="Buscar por título ou chave..." class="bg-slate-800 text-xs text-slate-200 border border-slate-700 px-3 py-1.5 rounded w-64 focus:outline-none focus:border-sky-500">
+      </div>
+
+      <div class="glass-card rounded-xl overflow-hidden border border-slate-800">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/90 text-slate-400 uppercase font-semibold border-b border-slate-800">
+              <tr>
+                <th class="p-3" data-i18n="thIdKey">ID / Chave</th>
+                <th class="p-3" data-i18n="thChannel">Canal</th>
+                <th class="p-3" data-i18n="thDate">Data</th>
+                <th class="p-3" data-i18n="thOriginalTitle">Título Original</th>
+                <th class="p-3" data-i18n="thHarmonized">Título Harmonizado</th>
+                <th class="p-3" data-i18n="thSubtitle">Subtítulo</th>
+                <th class="p-3" data-i18n="thRepeat">Repetição</th>
+                <th class="p-3 text-right" data-i18n="thEdit">Editar</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-all-programmes" class="divide-y divide-slate-800/60">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. ABA: RECONCILIAÇÃO DE SPOTS -->
+    <section id="sec-spot-differences" class="space-y-4 hidden">
+      <div>
+        <h2 class="text-lg font-bold text-white" data-i18n="sec4Title">Relatório de Diferenças de Spots & Comerciais</h2>
+        <p class="text-xs text-slate-400" data-i18n="sec4Sub">Reconciliação entre eventos comerciais monitorados e arquivos de planejamento de agências/sales houses.</p>
+      </div>
+
+      <div class="glass-card rounded-xl overflow-hidden border border-slate-800">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/90 text-slate-400 uppercase font-semibold border-b border-slate-800">
+              <tr>
+                <th class="p-3" data-i18n="thChannel">Canal</th>
+                <th class="p-3" data-i18n="thAdvertiserCommercial">Anunciante / Comercial</th>
+                <th class="p-3" data-i18n="thPlannedTime">Horário Planejado</th>
+                <th class="p-3" data-i18n="thMonitoredTime">Horário Monitorado</th>
+                <th class="p-3" data-i18n="thDiscrepancyType">Tipo de Discrepância</th>
+                <th class="p-3" data-i18n="thStatus">Status</th>
+                <th class="p-3 text-right" data-i18n="thActionFeedback">Ação / Feedback</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-spot-differences" class="divide-y divide-slate-800/60">
+              <!-- Renderizado via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. ABA: KPIS & RELATÓRIOS -->
+    <section id="sec-kpi-dashboard" class="space-y-6 hidden">
+      <div>
+        <h2 class="text-lg font-bold text-white" data-i18n="sec5Title">Dashboard Operacional de KPIs & SLAs</h2>
+        <p class="text-xs text-slate-400" data-i18n="sec5Sub">Métricas de qualidade, performance de entrega e conformidade de auditabilidade.</p>
+      </div>
+
+      <!-- Grid de Cards de Estatísticas -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card p-4 rounded-xl border-l-4 border-l-sky-500">
+          <span class="text-xs text-slate-400 font-medium" data-i18n="kpiSlaTitle">SLA Compliance</span>
+          <div id="kpi-sla" class="text-2xl font-extrabold text-white mt-1">94.5%</div>
+          <span class="text-[10px] text-emerald-400"><i class="fa-solid fa-arrow-up mr-1"></i><span data-i18n="kpiSlaSub">+1.2% referente ao último ciclo</span></span>
+        </div>
+        <div class="glass-card p-4 rounded-xl border-l-4 border-l-emerald-500">
+          <span class="text-xs text-slate-400 font-medium" data-i18n="kpiSpotMatchTitle">Spot Match Rate (Planejado x Monitorado)</span>
+          <div id="kpi-spot-match" class="text-2xl font-extrabold text-white mt-1">96.8%</div>
+          <span class="text-[10px] text-emerald-400"><i class="fa-solid fa-check-circle mr-1"></i><span data-i18n="kpiSpotMatchSub">Meta mantida (>95%)</span></span>
+        </div>
+        <div class="glass-card p-4 rounded-xl border-l-4 border-l-indigo-500">
+          <span class="text-xs text-slate-400 font-medium" data-i18n="kpiAsRunTitle">Taxa Sucesso Arquivos AsRun</span>
+          <div id="kpi-asrun" class="text-2xl font-extrabold text-white mt-1">98.2%</div>
+          <span class="text-[10px] text-slate-400" data-i18n="kpiAsRunSub">Pontualidade em 30 praças</span>
+        </div>
+        <div class="glass-card p-4 rounded-xl border-l-4 border-l-amber-500">
+          <span class="text-xs text-slate-400 font-medium" data-i18n="kpiOpenDiffsTitle">Divergências Abertas (Total)</span>
+          <div id="kpi-open-diffs" class="text-2xl font-extrabold text-amber-400 mt-1">10</div>
+          <span class="text-[10px] text-amber-300" data-i18n="kpiOpenDiffsSub">Em análise pelas emissoras</span>
+        </div>
+      </div>
+
+      <!-- Gráficos com Chart.js -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="glass-card p-5 rounded-xl border border-slate-800">
+          <h3 class="text-xs font-bold text-slate-300 mb-4 uppercase tracking-wider" data-i18n="chart1Title">Volume de Divergências por Módulo</h3>
+          <div class="h-64">
+            <canvas id="chartDiscrepancies"></canvas>
+          </div>
+        </div>
+        <div class="glass-card p-5 rounded-xl border border-slate-800">
+          <h3 class="text-xs font-bold text-slate-300 mb-4 uppercase tracking-wider" data-i18n="chart2Title">Cumprimento de SLA por Canal (%)</h3>
+          <div class="h-64">
+            <canvas id="chartSla"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal de Edição / Aprovação -->
+  <div id="actionModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+    <div class="glass-card bg-slate-900 border border-slate-700 w-full max-w-lg rounded-xl p-6 shadow-2xl relative space-y-4">
+      <button onclick="closeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <h3 id="modalTitle" class="text-base font-bold text-white">Formulário de Feedback & Reconciliação</h3>
+      <div id="modalBody" class="space-y-3 text-xs">
+        <!-- Renderizado dinamicamente -->
+      </div>
+      <div class="flex justify-end space-x-2 pt-2 border-t border-slate-800">
+        <button onclick="closeModal()" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded text-xs" data-i18n="btnCancel">Cancelar</button>
+        <button id="modalSubmitBtn" class="px-4 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded text-xs transition" data-i18n="btnSave">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentTab = 'new-programmes';
+    let currentLang = 'pt';
+    let channels = [];
+    let spotCache = [];
+    let chart1, chart2;
+
+    const translations = {
+      pt: {
+        portalTitle: "Reconciliation Portal v1.0",
+        cycleLabel: "Ciclo:",
+        allCycles: "Todos os Ciclos",
+        slaClosesIn: "SLA Fecha em:",
+        profileLabel: "Perfil:",
+        langLabel: "Idioma:",
+        tab1: "1. Novos Programas",
+        tab2: "2. Divergências de Grade",
+        tab3: "3. Manutenção de Programas",
+        tab4: "4. Reconciliação de Spots",
+        tab5: "5. KPIs & Relatórios",
+        channelLabel: "Canal:",
+        allChannels: "Todos os Canais",
+        statusLabel: "Status:",
+        allStatuses: "Todos os Status",
+        exportCsv: "Exportar CSV",
+        exportExcel: "Exportar Excel",
+        sec1Title: "Relatório de Novos Programas Identificados",
+        sec1Sub: "Validação de metadados e títulos harmonizados de programas recém-detectados pelo monitoramento.",
+        thChannel: "Canal",
+        thDateTime: "Data / Horário",
+        thCapturedTitle: "Título Capturado (Original)",
+        thHarmonizedTitle: "Título Harmonizado Proposto",
+        thCategory: "Categoria / Gênero",
+        thStatus: "Status",
+        thActions: "Ações",
+        btnReviewApprove: "Revisar / Aprovar",
+        sec2Title: "Relatório de Divergências de Grade (TV & Rádio)",
+        sec2Sub: "Comparação entre os arquivos da emissora (Programme Before) e a saída monitorada.",
+        thTime: "Horário",
+        thPlannedGrid: "Grade Prevista (Programme Before)",
+        thMonitoredGrid: "Efetivamente Monitorado",
+        thDiffType: "Tipo de Divergência",
+        btnHandle: "Tratar",
+        sec3Title: "Manutenção Geral de Programas Entregues",
+        sec3Sub: "Edição de metadados permissíveis (Chave de Reconciliação, Subtítulo, Código de Repetição).",
+        searchPlaceholder: "Buscar por título ou chave...",
+        thIdKey: "ID / Chave",
+        thDate: "Data",
+        thOriginalTitle: "Título Original",
+        thHarmonized: "Título Harmonizado",
+        thSubtitle: "Subtítulo",
+        thRepeat: "Repetição",
+        thEdit: "Editar",
+        sec4Title: "Relatório de Diferenças de Spots & Comerciais",
+        sec4Sub: "Reconciliação entre eventos comerciais monitorados e arquivos de planejamento de agências/sales houses.",
+        thAdvertiserCommercial: "Anunciante / Comercial",
+        thPlannedTime: "Horário Planejado",
+        thMonitoredTime: "Horário Monitorado",
+        thDiscrepancyType: "Tipo de Discrepância",
+        thActionFeedback: "Ação / Feedback",
+        btnHandleSpot: "Editar Spot",
+        notPlanned: "Não planejado",
+        notAired: "Não veiculado",
+        sec5Title: "Dashboard Operacional de KPIs & SLAs",
+        sec5Sub: "Métricas de qualidade, performance de entrega e conformidade de auditabilidade.",
+        kpiSlaTitle: "SLA Compliance",
+        kpiSlaSub: "+1.2% referente ao último ciclo",
+        kpiSpotMatchTitle: "Spot Match Rate (Planejado x Monitorado)",
+        kpiSpotMatchSub: "Meta mantida (>95%)",
+        kpiAsRunTitle: "Taxa Sucesso Arquivos AsRun",
+        kpiAsRunSub: "Pontualidade em 30 praças",
+        kpiOpenDiffsTitle: "Divergências Abertas (Total)",
+        kpiOpenDiffsSub: "Em análise pelas emissoras",
+        chart1Title: "Volume de Divergências por Módulo",
+        chart2Title: "Cumprimento de SLA por Canal (%)",
+        chart1Dataset: "Abertos / Pendentes",
+        chart1Label1: "Novos Programas",
+        chart1Label2: "Divergências Grade",
+        chart1Label3: "Divergências Spots",
+        modalApproveTitle: "Aprovar / Editar Novo Programa",
+        modalEditTitle: "Editar Metadados de Programa",
+        modalSpotTitle: "Editar Atributos do Spot & Comercial",
+        lblCapturedTitle: "Título Capturado:",
+        lblHarmonizedTitleProp: "Sugestão de Título Harmonizado:",
+        lblCategory: "Categoria / Gênero:",
+        lblComments: "Comentários / Observações:",
+        phComments: "Adicionar feedback...",
+        btnCancel: "Cancelar",
+        btnSave: "Salvar Alterações",
+        lblSubtitle: "Subtítulo:",
+        lblNewStatus: "Status:",
+        lblJustification: "Justificativa / Comentário:",
+        phJustification: "Motivo do ajuste...",
+        lblSpotTitle: "Título do Comercial / Spot:",
+        lblAdvertiser: "Anunciante / Marca:",
+        lblPlannedTime: "Horário Planejado:",
+        lblMonitoredTime: "Horário Monitorado:",
+        lblDiscrepancyType: "Tipo de Discrepância:",
+        exportingMsg: "Exportando relatório atual no formato"
+      },
+      en: {
+        portalTitle: "Reconciliation Portal v1.0",
+        cycleLabel: "Cycle:",
+        allCycles: "All Cycles",
+        slaClosesIn: "SLA Closes in:",
+        profileLabel: "Profile:",
+        langLabel: "Language:",
+        tab1: "1. New Programmes",
+        tab2: "2. Schedule Differences",
+        tab3: "3. Programme Maintenance",
+        tab4: "4. Spot Reconciliation",
+        tab5: "5. KPIs & Reports",
+        channelLabel: "Channel:",
+        allChannels: "All Channels",
+        statusLabel: "Status:",
+        allStatuses: "All Statuses",
+        exportCsv: "Export CSV",
+        exportExcel: "Export Excel",
+        sec1Title: "Identified New Programmes Report",
+        sec1Sub: "Metadata validation and harmonized titles for newly detected monitoring programmes.",
+        thChannel: "Channel",
+        thDateTime: "Date / Time",
+        thCapturedTitle: "Captured Title (Original)",
+        thHarmonizedTitle: "Proposed Harmonized Title",
+        thCategory: "Category / Genre",
+        thStatus: "Status",
+        thActions: "Actions",
+        btnReviewApprove: "Review / Approve",
+        sec2Title: "Schedule Differences Report (TV & Radio)",
+        sec2Sub: "Comparison between broadcaster logs (Programme Before) and monitored output.",
+        thTime: "Time",
+        thPlannedGrid: "Planned Schedule (Programme Before)",
+        thMonitoredGrid: "Actually Monitored",
+        thDiffType: "Discrepancy Type",
+        btnHandle: "Handle",
+        sec3Title: "General Maintenance of Delivered Programmes",
+        sec3Sub: "Editing allowable metadata (Reconciliation Key, Subtitle, Repeat Code).",
+        searchPlaceholder: "Search by title or key...",
+        thIdKey: "ID / Key",
+        thDate: "Date",
+        thOriginalTitle: "Original Title",
+        thHarmonized: "Harmonized Title",
+        thSubtitle: "Subtitle",
+        thRepeat: "Repeat",
+        thEdit: "Edit",
+        sec4Title: "Spot & Commercial Differences Report",
+        sec4Sub: "Reconciliation between monitored commercial events and agency/sales house planning logs.",
+        thAdvertiserCommercial: "Advertiser / Commercial",
+        thPlannedTime: "Planned Time",
+        thMonitoredTime: "Monitored Time",
+        thDiscrepancyType: "Discrepancy Type",
+        thActionFeedback: "Action / Feedback",
+        btnHandleSpot: "Edit Spot",
+        notPlanned: "Not planned",
+        notAired: "Not aired",
+        sec5Title: "Operational KPI & SLA Dashboard",
+        sec5Sub: "Quality metrics, delivery performance, and auditability compliance.",
+        kpiSlaTitle: "SLA Compliance",
+        kpiSlaSub: "+1.2% vs last cycle",
+        kpiSpotMatchTitle: "Spot Match Rate (Planned vs Monitored)",
+        kpiSpotMatchSub: "Target maintained (>95%)",
+        kpiAsRunTitle: "AsRun File Success Rate",
+        kpiAsRunSub: "Punctuality across 30 markets",
+        kpiOpenDiffsTitle: "Open Discrepancies (Total)",
+        kpiOpenDiffsSub: "Under review by broadcasters",
+        chart1Title: "Discrepancy Volume by Module",
+        chart2Title: "SLA Compliance by Channel (%)",
+        chart1Dataset: "Open / Pending",
+        chart1Label1: "New Programmes",
+        chart1Label2: "Schedule Diffs",
+        chart1Label3: "Spot Diffs",
+        modalApproveTitle: "Approve / Edit New Programme",
+        modalEditTitle: "Edit Programme Metadata",
+        modalSpotTitle: "Edit Spot & Commercial Attributes",
+        lblCapturedTitle: "Captured Title:",
+        lblHarmonizedTitleProp: "Proposed Harmonized Title:",
+        lblCategory: "Category / Genre:",
+        lblComments: "Comments / Notes:",
+        phComments: "Add feedback...",
+        btnCancel: "Cancel",
+        btnSave: "Save Changes",
+        lblSubtitle: "Subtitle:",
+        lblNewStatus: "Status:",
+        lblJustification: "Justification / Note:",
+        phJustification: "Reason for adjustment...",
+        lblSpotTitle: "Spot / Commercial Title:",
+        lblAdvertiser: "Advertiser / Brand:",
+        lblPlannedTime: "Planned Time:",
+        lblMonitoredTime: "Monitored Time:",
+        lblDiscrepancyType: "Discrepancy Type:",
+        exportingMsg: "Exporting current report in format"
+      }
+    };
+
+    function t(key) {
+      return (translations[currentLang] && translations[currentLang][key]) || key;
+    }
+
+    function changeLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('pielsen_lang', lang);
+      document.getElementById('langSelector').value = lang;
+
+      // Update all data-i18n elements
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[currentLang][key]) {
+          el.innerText = translations[currentLang][key];
+        }
+      });
+
+      // Update all data-i18n-ph placeholders
+      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.getAttribute('data-i18n-ph');
+        if (translations[currentLang][key]) {
+          el.setAttribute('placeholder', translations[currentLang][key]);
+        }
+      });
+
+      loadChannelsOptions();
+      loadCurrentTab();
+    }
+
+    // Dados de fallback caso a API local não responda (para compatibilidade total)
+    const fallbackNewProgrammes = [
+      { id: 1, channel_code: 'TV_GLOBO', broadcast_date: '2026-07-31', start_time: '14:15', end_time: '15:30', original_title: 'ESPECIAL OLIMPIADAS PARIS 2026', proposed_harmonized_title: 'ESPECIAL ESPORTE OLIMPICO', category: 'Esportes', status: 'New' },
+      { id: 2, channel_code: 'RECORD_TV', broadcast_date: '2026-07-31', start_time: '22:45', end_time: '23:45', original_title: 'DOC RECORD - INVESTIGAÇÕES ESPECIAIS', proposed_harmonized_title: 'DOC RECORD INVESTIGAÇÕES', category: 'Documentário', status: 'Open' },
+      { id: 3, channel_code: 'SBT', broadcast_date: '2026-07-30', start_time: '18:30', end_time: '19:45', original_title: 'CIRCUS CELEBRITY SPECIAL', proposed_harmonized_title: 'SBT SHOW CELEBRIDADES', category: 'Variedades', status: 'Accepted' }
+    ];
+
+    const fallbackProgDiffs = [
+      { id: 4, channel_code: 'BAND', start_time: '16:00', end_time: '17:30', programme_before_title: 'SUPER PODEROSAS', original_title: 'BRASIL URGENTE - EDICAO EXTRA', mismatch_type: 'Substituição de Grade', status: 'Open' },
+      { id: 5, channel_code: 'RADIO_CBN', start_time: '09:00', end_time: '10:00', programme_before_title: 'CBN PRIMEIRA EDICAO', original_title: 'CBN MADRUGADA NOTICIAS', mismatch_type: 'Title Mismatch', status: 'Feedback Submitted' },
+      { id: 6, channel_code: 'GLOBO_ONLINE', start_time: '20:00', end_time: '21:00', programme_before_title: 'REPLAY JORNAL NACIONAL', original_title: 'TRANSMISSAO AO VIVO - PODCAST G1', mismatch_type: 'Formato Digital', status: 'Resolved' }
+    ];
+
+    const fallbackSpots = [
+      { id: 1, channel_code: 'TV_GLOBO', spot_title: 'MCDONALDS - NOVO BIG MAC CRISPY 30s', advertiser: 'ARCOS DOURADOS / MCDONALDS', planned_time: '14:22:10', monitored_time: '14:28:45', discrepancy_type: 'Timing Difference', status: 'Open' },
+      { id: 2, channel_code: 'RECORD_TV', spot_title: 'SANTANDER - CARTAO UNLIMITED 15s', advertiser: 'BANCO SANTANDER BRASIL', planned_time: '22:50:00', monitored_time: '', discrepancy_type: 'Missing Spot', status: 'Feedback Submitted' },
+      { id: 3, channel_code: 'SBT', spot_title: 'AMBEV - CERVEJA BRAHMA DUPLO MALTE 30s', advertiser: 'AMBEV S.A.', planned_time: '', monitored_time: '19:12:05', discrepancy_type: 'Additional Spot', status: 'Accepted' },
+      { id: 4, channel_code: 'BAND', spot_title: 'COCA COLA - ZERO ACUCAR REFRESH 30s', advertiser: 'COCA-COLA FEMSA', planned_time: '16:45:00', monitored_time: '17:10:00', discrepancy_type: 'Break Discrepancy', status: 'New' }
+    ];
+
+    async function init() {
+      const savedLang = localStorage.getItem('pielsen_lang') || 'pt';
+      currentLang = savedLang;
+      document.getElementById('langSelector').value = currentLang;
+
+      await loadChannels();
+      await loadSummaryBadges();
+      changeLanguage(currentLang);
+    }
+
+    async function loadChannels() {
+      try {
+        const res = await fetch('/api/channels');
+        if (res.ok) {
+          channels = await res.json();
+        } else {
+          throw new Error("offline");
+        }
+      } catch (e) {
+        channels = [
+          { code: "TV_GLOBO", name: "TV Globo", media_type: "TV" },
+          { code: "RECORD_TV", name: "Record TV", media_type: "TV" },
+          { code: "SBT", name: "SBT", media_type: "TV" },
+          { code: "BAND", name: "Band", media_type: "TV" },
+          { code: "RADIO_CBN", name: "Rádio CBN FM", media_type: "Radio" },
+          { code: "GLOBO_ONLINE", name: "G1 / Globoplay", media_type: "Online" }
+        ];
+      }
+      loadChannelsOptions();
+    }
+
+    function loadChannelsOptions() {
+      const sel = document.getElementById('channelFilter');
+      const curVal = sel.value;
+      sel.innerHTML = `<option value="">${t('allChannels')}</option>`;
+      channels.forEach(c => {
+        sel.innerHTML += `<option value="${c.code}">${c.name} (${c.media_type})</option>`;
+      });
+      sel.value = curVal;
+    }
+
+    async function loadSummaryBadges() {
+      try {
+        const res = await fetch('/api/kpis');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('badge-new-prog').innerText = data.summary.new_programmes;
+          document.getElementById('badge-diff-prog').innerText = data.summary.prog_differences_open;
+          document.getElementById('badge-diff-spots').innerText = data.summary.spot_differences_open;
+          document.getElementById('kpi-sla').innerText = data.summary.sla_compliance + "%";
+          document.getElementById('kpi-spot-match').innerText = data.summary.spot_match_rate + "%";
+          document.getElementById('kpi-asrun').innerText = data.summary.asrun_success_rate + "%";
+          document.getElementById('kpi-open-diffs').innerText = data.summary.prog_differences_open + data.summary.spot_differences_open;
+          return;
+        }
+      } catch (e) {}
+      document.getElementById('badge-new-prog').innerText = "3";
+      document.getElementById('badge-diff-prog').innerText = "3";
+      document.getElementById('badge-diff-spots').innerText = "4";
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+
+      document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('sec-' + tab).classList.remove('hidden');
+
+      loadCurrentTab();
+    }
+
+    function loadCurrentTab() {
+      if (currentTab === 'new-programmes') loadNewProgrammes();
+      else if (currentTab === 'prog-differences') loadProgDifferences();
+      else if (currentTab === 'all-programmes') loadAllProgrammes();
+      else if (currentTab === 'spot-differences') loadSpotDifferences();
+      else if (currentTab === 'kpi-dashboard') renderKpiCharts();
+    }
+
+    function getFilterParams() {
+      const channel = document.getElementById('channelFilter').value;
+      const status = document.getElementById('statusFilter').value;
+      const cycle = document.getElementById('cycleSelector').value;
+      let params = new URLSearchParams();
+      if (channel) params.append('channel_code', channel);
+      if (status) params.append('status', status);
+      if (cycle) params.append('cycle', cycle);
+      return params.toString();
+    }
+
+    // 1. Novos Programas
+    async function loadNewProgrammes() {
+      const tbody = document.getElementById('tbody-new-programmes');
+      let data = [];
+      try {
+        const res = await fetch('/api/programmes/new?' + getFilterParams());
+        if (res.ok) data = await res.json();
+      } catch (e) {}
+      
+      if (!data || data.length === 0) data = fallbackNewProgrammes;
+
+      tbody.innerHTML = data.map(item => `
+        <tr class="hover:bg-slate-900/60 transition">
+          <td class="p-3 font-semibold text-sky-400">${item.channel_code}</td>
+          <td class="p-3 text-slate-300">${item.broadcast_date} <span class="text-slate-500">${item.start_time}-${item.end_time}</span></td>
+          <td class="p-3 font-medium text-white">${item.original_title}</td>
+          <td class="p-3 text-slate-300">${item.proposed_harmonized_title || item.harmonized_title || '-'}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">${item.category || '-'}</span></td>
+          <td class="p-3">${getStatusBadge(item.status)}</td>
+          <td class="p-3 text-right">
+            <button onclick="openApproveModal(${item.id}, '${item.original_title}', '${item.proposed_harmonized_title || ''}', '${item.category || ''}')" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded font-medium text-xs">${t('btnReviewApprove')}</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 2. Divergências de Grade
+    async function loadProgDifferences() {
+      const tbody = document.getElementById('tbody-prog-differences');
+      let data = [];
+      try {
+        const res = await fetch('/api/programmes/differences?' + getFilterParams());
+        if (res.ok) data = await res.json();
+      } catch (e) {}
+
+      if (!data || data.length === 0) data = fallbackProgDiffs;
+
+      tbody.innerHTML = data.map(item => `
+        <tr class="hover:bg-slate-900/60 transition">
+          <td class="p-3 font-semibold text-sky-400">${item.channel_code}</td>
+          <td class="p-3 text-slate-400">${item.start_time}-${item.end_time}</td>
+          <td class="p-3 text-rose-300 line-through">${item.programme_before_title || '-'}</td>
+          <td class="p-3 text-emerald-400 font-medium">${item.original_title}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800/60">${item.mismatch_type || 'Divergência'}</span></td>
+          <td class="p-3">${getStatusBadge(item.status)}</td>
+          <td class="p-3 text-right">
+            <button onclick="openEditModal(${item.id}, '${item.original_title}', '${item.subtitle || ''}', '${item.category || ''}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded text-xs">${t('btnHandle')}</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 3. Manutenção de Programas
+    async function loadAllProgrammes() {
+      const tbody = document.getElementById('tbody-all-programmes');
+      let data = [];
+      try {
+        const res = await fetch('/api/programmes/all?' + getFilterParams());
+        if (res.ok) data = await res.json();
+      } catch (e) {}
+
+      if (!data || data.length === 0) data = [...fallbackNewProgrammes, ...fallbackProgDiffs];
+
+      tbody.innerHTML = data.map(item => `
+        <tr class="hover:bg-slate-900/60 transition">
+          <td class="p-3 font-mono text-slate-400">${item.reconciliation_key || item.id}</td>
+          <td class="p-3 font-semibold text-sky-400">${item.channel_code}</td>
+          <td class="p-3 text-slate-400">${item.broadcast_date || '2026-07-31'}</td>
+          <td class="p-3 font-medium text-white">${item.original_title}</td>
+          <td class="p-3 text-slate-300">${item.proposed_harmonized_title || item.harmonized_title || '-'}</td>
+          <td class="p-3 text-slate-400">${item.subtitle || '-'}</td>
+          <td class="p-3"><span class="px-1.5 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300">${item.repeat_code || 'N'}</span></td>
+          <td class="p-3 text-right">
+            <button onclick="openEditModal(${item.id}, '${item.original_title}', '${item.subtitle || ''}', '${item.category || ''}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded text-xs"><i class="fa-solid fa-pen"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // 4. Reconciliação de Spots
+    async function loadSpotDifferences() {
+      const tbody = document.getElementById('tbody-spot-differences');
+      let data = [];
+      try {
+        const res = await fetch('/api/spots/differences?' + getFilterParams());
+        if (res.ok) data = await res.json();
+      } catch (e) {}
+
+      if (!data || data.length === 0) data = fallbackSpots;
+      spotCache = data;
+
+      tbody.innerHTML = data.map(item => `
+        <tr class="hover:bg-slate-900/60 transition">
+          <td class="p-3 font-semibold text-sky-400">${item.channel_code}</td>
+          <td class="p-3">
+            <div class="font-medium text-white">${item.spot_title}</div>
+            <div class="text-[10px] text-slate-400">${item.advertiser}</div>
+          </td>
+          <td class="p-3 text-slate-400">${item.planned_time || `<em class="text-slate-600">${t('notPlanned')}</em>`}</td>
+          <td class="p-3 text-slate-300 font-mono">${item.monitored_time || `<em class="text-rose-400">${t('notAired')}</em>`}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800/60">${item.discrepancy_type}</span></td>
+          <td class="p-3">${getStatusBadge(item.status)}</td>
+          <td class="p-3 text-right">
+            <button onclick="openSpotModal(${item.id})" class="px-2.5 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs">${t('btnHandleSpot')}</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Modal Helpers
+    function closeModal() {
+      document.getElementById('actionModal').classList.add('hidden');
+    }
+
+    function openApproveModal(id, title, proposedTitle, category) {
+      document.getElementById('modalTitle').innerText = t('modalApproveTitle');
+      document.getElementById('modalBody').innerHTML = `
+        <div><label class="text-slate-400">${t('lblCapturedTitle')}</label><p class="font-semibold text-white mt-0.5">${title}</p></div>
+        <div><label class="text-slate-400">${t('lblHarmonizedTitleProp')}</label><input id="inpPropTitle" value="${proposedTitle || title}" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1"></div>
+        <div><label class="text-slate-400">${t('lblCategory')}</label><input id="inpPropCat" value="${category}" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1"></div>
+        <div><label class="text-slate-400">${t('lblComments')}</label><textarea id="inpComments" rows="2" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1" placeholder="${t('phComments')}"></textarea></div>
+      `;
+      document.getElementById('modalSubmitBtn').innerText = t('btnSave');
+      document.getElementById('modalSubmitBtn').onclick = async () => {
+        try {
+          await fetch(`/api/programmes/${id}/approve`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              proposed_harmonized_title: document.getElementById('inpPropTitle').value,
+              proposed_category: document.getElementById('inpPropCat').value,
+              feedback_comments: document.getElementById('inpComments').value,
+              status: 'Accepted'
+            })
+          });
+        } catch (e) {}
+        closeModal();
+        loadCurrentTab();
+      };
+      document.getElementById('actionModal').classList.remove('hidden');
+    }
+
+    function openEditModal(id, title, subtitle, category) {
+      document.getElementById('modalTitle').innerText = t('modalEditTitle');
+      document.getElementById('modalBody').innerHTML = `
+        <div><label class="text-slate-400">${t('thHarmonized')}:</label><input id="inpTitle" value="${title}" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1"></div>
+        <div><label class="text-slate-400">${t('lblSubtitle')}</label><input id="inpSub" value="${subtitle}" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1"></div>
+        <div><label class="text-slate-400">${t('thCategory')}:</label><input id="inpCat" value="${category}" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1"></div>
+      `;
+      document.getElementById('modalSubmitBtn').innerText = t('btnSave');
+      document.getElementById('modalSubmitBtn').onclick = async () => {
+        try {
+          await fetch(`/api/programmes/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              harmonized_title: document.getElementById('inpTitle').value,
+              subtitle: document.getElementById('inpSub').value,
+              category: document.getElementById('inpCat').value,
+              status: 'Resolved'
+            })
+          });
+        } catch (e) {}
+        closeModal();
+        loadCurrentTab();
+      };
+      document.getElementById('actionModal').classList.remove('hidden');
+    }
+
+    function openSpotModal(id) {
+      const spot = spotCache.find(s => s.id === id) || {
+        id: id,
+        spot_title: '',
+        advertiser: '',
+        planned_time: '',
+        monitored_time: '',
+        discrepancy_type: 'Timing Difference',
+        status: 'Open',
+        comments: ''
+      };
+
+      document.getElementById('modalTitle').innerText = t('modalSpotTitle');
+      document.getElementById('modalBody').innerHTML = `
+        <div>
+          <label class="text-slate-400">${t('lblSpotTitle')}</label>
+          <input id="inpSpotTitle" value="${spot.spot_title || ''}" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1">
+        </div>
+        <div>
+          <label class="text-slate-400">${t('lblAdvertiser')}</label>
+          <input id="inpSpotAdvertiser" value="${spot.advertiser || ''}" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-slate-400">${t('lblPlannedTime')}</label>
+            <input id="inpSpotPlannedTime" value="${spot.planned_time || ''}" placeholder="14:22:10" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1">
+          </div>
+          <div>
+            <label class="text-slate-400">${t('lblMonitoredTime')}</label>
+            <input id="inpSpotMonitoredTime" value="${spot.monitored_time || ''}" placeholder="14:28:45" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-slate-400">${t('lblDiscrepancyType')}</label>
+            <select id="inpSpotDiscrepancyType" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1">
+              <option value="Timing Difference" ${spot.discrepancy_type === 'Timing Difference' ? 'selected' : ''}>Timing Difference</option>
+              <option value="Missing Spot" ${spot.discrepancy_type === 'Missing Spot' ? 'selected' : ''}>Missing Spot</option>
+              <option value="Additional Spot" ${spot.discrepancy_type === 'Additional Spot' ? 'selected' : ''}>Additional Spot</option>
+              <option value="Break Discrepancy" ${spot.discrepancy_type === 'Break Discrepancy' ? 'selected' : ''}>Break Discrepancy</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-slate-400">${t('lblNewStatus')}</label>
+            <select id="inpSpotStatus" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1">
+              <option value="New" ${spot.status === 'New' ? 'selected' : ''}>New</option>
+              <option value="Open" ${spot.status === 'Open' ? 'selected' : ''}>Open</option>
+              <option value="Accepted" ${spot.status === 'Accepted' ? 'selected' : ''}>Accepted</option>
+              <option value="Rejected" ${spot.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+              <option value="Feedback Submitted" ${spot.status === 'Feedback Submitted' ? 'selected' : ''}>Feedback Submitted</option>
+              <option value="Resolved" ${spot.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+              <option value="Closed" ${spot.status === 'Closed' ? 'selected' : ''}>Closed</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="text-slate-400">${t('lblJustification')}</label>
+          <textarea id="inpSpotComments" rows="2" class="w-full bg-slate-800 border border-slate-700 rounded px-2.5 py-1.5 text-white mt-1" placeholder="${t('phJustification')}">${spot.comments || ''}</textarea>
+        </div>
+      `;
+      document.getElementById('modalSubmitBtn').innerText = t('btnSave');
+      document.getElementById('modalSubmitBtn').onclick = async () => {
+        try {
+          const updatedData = {
+            spot_title: document.getElementById('inpSpotTitle').value,
+            advertiser: document.getElementById('inpSpotAdvertiser').value,
+            planned_time: document.getElementById('inpSpotPlannedTime').value,
+            monitored_time: document.getElementById('inpSpotMonitoredTime').value,
+            discrepancy_type: document.getElementById('inpSpotDiscrepancyType').value,
+            status: document.getElementById('inpSpotStatus').value,
+            comments: document.getElementById('inpSpotComments').value
+          };
+
+          // Update local cache item immediately
+          Object.assign(spot, updatedData);
+
+          await fetch(`/api/spots/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(updatedData)
+          });
+        } catch (e) {}
+        closeModal();
+        loadCurrentTab();
+      };
+      document.getElementById('actionModal').classList.remove('hidden');
+    }
+
+    function getStatusBadge(status) {
+      if (status === 'New') return '<span class="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800/80">New</span>';
+      if (status === 'Open') return '<span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800/80">Open</span>';
+      if (status === 'Accepted') return '<span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800/80">Accepted</span>';
+      if (status === 'Resolved') return '<span class="px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800/80">Resolved</span>';
+      return `<span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">${status}</span>`;
+    }
+
+    function exportData(format) {
+      alert(`${t('exportingMsg')} ${format.toUpperCase()}...`);
+    }
+
+    function renderKpiCharts() {
+      if (chart1) chart1.destroy();
+      if (chart2) chart2.destroy();
+
+      const ctx1 = document.getElementById('chartDiscrepancies').getContext('2d');
+      chart1 = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: [t('chart1Label1'), t('chart1Label2'), t('chart1Label3')],
+          datasets: [{
+            label: t('chart1Dataset'),
+            data: [14, 28, 19],
+            backgroundColor: ['#38bdf8', '#f59e0b', '#f43f5e']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          }
+        }
+      });
+
+      const ctx2 = document.getElementById('chartSla').getContext('2d');
+      chart2 = new Chart(ctx2, {
+        type: 'line',
+        data: {
+          labels: ['TV Globo', 'Record TV', 'SBT', 'Band', 'CBN FM'],
+          datasets: [{
+            label: 'SLA (%)',
+            data: [98.5, 95.0, 92.4, 94.0, 99.0],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+            y: { min: 80, max: 100, ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+          }
+        }
+      });
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
