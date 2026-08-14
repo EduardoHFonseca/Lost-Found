@@ -333,7 +333,7 @@ with tab3:
                     )
 
                     novo_cnpj_input = st.text_input("Novo CNPJ para este anunciante (necessário se escolher 'TROCAR_PARA_FILIAL'):", value=item_atual.cnpj_formatado or "")
-                    operador_nome = st.text_input("Seu Identificador / E-mail de Operador:", value="operador.globo@kantar.com")
+                    operador_nome = st.text_input("Seu Identificador / E-mail de Operador:", value="operador.globo@ibope.com")
                     justificativa_text = st.text_area("Justificativa da Decisão de Mediação:", value="Aprovado ajuste após análise da regra comercial e verificação na Receita.")
 
                     btn_submit = st.form_submit_button("💾 Salvar Decisão de Mediação e Atualizar Registros", type="primary")
@@ -407,7 +407,7 @@ with tab3:
                     )
 
                     manual_cnpj = st.text_input("Novo CNPJ (Preencher apenas se escolher 'ATUALIZAR_CNPJ_MANUAL'):", value="")
-                    operador_nome = st.text_input("Identificador do Operador:", value="operador.globo@kantar.com")
+                    operador_nome = st.text_input("Identificador do Operador:", value="operador.globo@ibope.com")
                     justificativa_text = st.text_area("Justificativa:", value="Análise efetuada e confirmada na base comercial.")
 
                     btn_sub_gen = st.form_submit_button("💾 Confirmar e Resolver Inconsistência", type="primary")
