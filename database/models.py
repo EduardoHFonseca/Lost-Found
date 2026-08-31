@@ -78,3 +78,56 @@ class MediacaoOperador(Base):
     data_decisao = Column(DateTime, default=datetime.datetime.utcnow)
 
     anunciante = relationship("Anunciante", back_populates="mediacoes")
+
+
+class GrupoEconomico(Base):
+    __tablename__ = "grupos_economicos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome_grupo = Column(String(255), unique=True, index=True, nullable=False)
+    cnpj_holding = Column(String(18), nullable=True)
+    descricao = Column(Text, nullable=True)
+    data_cadastro = Column(DateTime, default=datetime.datetime.utcnow)
+
+    marcas = relationship("MarcaProduto", back_populates="grupo", cascade="all, delete-orphan")
+
+
+class LoteMarca(Base):
+    __tablename__ = "lotes_marcas"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome_arquivo = Column(String(255), nullable=False)
+    data_importacao = Column(DateTime, default=datetime.datetime.utcnow)
+    total_linhas = Column(Integer, default=0)
+    total_mapeados = Column(Integer, default=0)
+    total_pendentes = Column(Integer, default=0)
+    status_lote = Column(String(50), default="CONCLUIDO")
+
+    marcas = relationship("MarcaProduto", back_populates="lote", cascade="all, delete-orphan")
+
+
+class MarcaProduto(Base):
+    __tablename__ = "marcas_produtos"
+
+    id = Column(Integer, primary_key=True, index=True)
+    lote_id = Column(Integer, ForeignKey("lotes_marcas.id", ondelete="SET NULL"), nullable=True)
+    grupo_id = Column(Integer, ForeignKey("grupos_economicos.id", ondelete="SET NULL"), nullable=True)
+
+    marca = Column(String(255), nullable=False, index=True)
+    anunciante_fantasia = Column(String(255), nullable=False, index=True)
+    grupo_informado = Column(String(255), nullable=True, index=True)
+
+    cnpj_identificado = Column(String(18), nullable=True, index=True)
+    cnpj_limpo = Column(String(14), nullable=True, index=True)
+    razao_social_identificada = Column(String(255), nullable=True)
+    eh_matriz = Column(Boolean, nullable=True)
+    pertence_grupo = Column(Boolean, default=True)
+    confianca_score = Column(Integer, default=100)
+    status_mapeamento = Column(String(50), default="MAPEADO_OK") # MAPEADO_OK, REQUER_VALIDACAO, DIVERGENCIA_GRUPO
+    origem_resolucao = Column(String(100), nullable=True) # DIRETORIO_SOCIETARIO, BASE_ANUNCIANTES, RECEITA_WS
+    observacoes = Column(Text, nullable=True)
+    data_atualizacao = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    grupo = relationship("GrupoEconomico", back_populates="marcas")
+    lote = relationship("LoteMarca", back_populates="marcas")
+

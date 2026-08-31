@@ -1,0 +1,16 @@
+Marca Fantasia Problem Statement:
+
+Problema: A segunda dor para tratar é identificar a relação entre um anunciante específico e o grupo econômico ao qual ele pertence. Embora seja possível chegar ao anunciante, razão social e CNPJ a partir de uma marca ou produto, ainda existe dificuldade em consolidar quais empresas, marcas fazem parte de uma mesma estrutura societária.
+
+CASE: A segunda etapa da iniciativa permitiria partir de uma marca/produto para identificar automaticamente o anunciante, o CNPJ correspondente e seu grupo econômico. Com isso, além da identificação do CNPJ individual, seria possível consolidar uma visão do grupo anunciante e mapear todos os produtos, marcas e empresas potencialmente associados à mesma holding ou conglomerado.
+
+Grupos como CCR, Votorantim e Neoenergia exemplificam bem esse desafio, devido à quantidade de empresas, subsidiárias e marcas que compõem suas estruturas. 
+Dessa forma, a solução agregaria uma camada de inteligência que conecta marca → anunciante → CNPJ → grupo econômico.
+
+
+A partir da lista de MARCA e ANUNCIANTE FANTASIA conseguimos:
+•	Identificar o Anunciante Fantasia correspondente a marca;
+•	Identificar a Razão Social correspondente;
+•	Encontrar o CNPJ correto;
+•	Validar se o anunciante pertence ao Grupo Anunciante informado;
+•	Identificar outras empresas, marcas e produtos associados ao mesmo grupo;

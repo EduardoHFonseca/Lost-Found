@@ -7,9 +7,11 @@ from sqlalchemy.orm import Session
 
 # Importações internas do projeto
 from database.database import SessionLocal, init_db
-from database.models import LoteIngestao, Anunciante, MediacaoOperador, ConsultaCNPJCache
+from database.models import LoteIngestao, Anunciante, MediacaoOperador, ConsultaCNPJCache, LoteMarca, MarcaProduto, GrupoEconomico
 from core.cnpj_engine import validate_cnpj, format_cnpj, clean_cnpj, generate_cnpj, is_matriz, extract_cnpj_root
+from core.group_engine import get_holding_360_view, resolve_brand_and_group, CONGLOMERADOS_CONHECIDOS
 from processors.batch_processor import process_batch_file
+from processors.marca_processor import process_marca_file
 from services.enrichment import enrich_cnpj_info
 
 
@@ -104,11 +106,12 @@ st.markdown("<div class='sub-header'>Normalização, detecção de divergências
 
 
 # ABAS NAVEGÁVEIS
-tab1, tab2, tab3, tab4 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📁 1. Carga & Ingestão",
     "📊 2. Painel Geral (KPIs)",
     "⚖️ 3. Caixa de Entrada & Mediação",
-    "📥 4. Exportação & Ferramentas"
+    "📥 4. Exportação & Ferramentas",
+    "🌳 5. Grupos Econômicos & Marcas (Holding 360°)"
 ])
 
 
@@ -561,4 +564,186 @@ with tab4:
             gen_val = generate_cnpj(matriz=(tipo_gen == "Matriz (/0001)"))
             st.info(f"CNPJ Gerado: `{gen_val}`")
 
+
+# ==============================================================================
+# ABA 5: GRUPOS ECONÔMICOS & MARCAS (HOLDING 360°)
+# ==============================================================================
+with tab5:
+    st.subheader("🌳 Mapeamento Societário 360°: Marca ➔ Anunciante ➔ CNPJ ➔ Grupo Econômico")
+    st.markdown("Consolidação da estrutura de holdings e conglomerados econômicos (CCR, Neoenergia, Votorantim, etc.), permitindo identificar marcas, subsidiárias e produtos associados.")
+
+    # --- Seção 1: Upload e Ingestão de Arquivo de Marcas ---
+    with st.expander("📁 1. Carga de Base de Marcas & Fantasias (Excel / CSV)", expanded=False):
+        c_up1, c_up2 = st.columns([2, 1])
+        with c_up1:
+            uploaded_marca_file = st.file_uploader("Selecione o arquivo de Marcas (ex: `CNPJ_2808 - Marca Fantasia.xlsx`):", type=["xlsx", "xls", "csv"], key="upload_marca_file")
+            if uploaded_marca_file is not None:
+                if st.button("🚀 Processar e Mapear Grupos Societários", type="primary", key="btn_proc_marca"):
+                    prog_bar = st.progress(0)
+                    stat_txt = st.empty()
+
+                    def update_prog_marca(p):
+                        prog_bar.progress(p)
+                        stat_txt.text(f"Mapeando marcas e holdings... {p}% concluído")
+
+                    lote_m, marcas_list = process_marca_file(
+                        uploaded_marca_file,
+                        uploaded_marca_file.name,
+                        db,
+                        progress_callback=update_prog_marca
+                    )
+                    st.success(f"Lote de Marcas #{lote_m.id} processado! {lote_m.total_mapeados} registros mapeados com sucesso.")
+                    st.rerun()
+
+        with c_up2:
+            st.markdown("<div class='card-box'>", unsafe_allow_html=True)
+            st.markdown("#### 📋 Colunas Esperadas")
+            st.markdown("""
+            - `Marca` (ou Produto)
+            - `Anunc Fantasia` (Nome Fantasia)
+            - `Grupo Anunciante` (Holding)
+            """)
+            st.markdown("</div>", unsafe_allow_html=True)
+
+    # --- Seção 2: KPIs Globais do Módulo de Marcas & Holdings ---
+    total_marcas_db = db.query(MarcaProduto).count()
+    total_grupos_db = db.query(GrupoEconomico).count()
+    total_anunc_db = db.query(MarcaProduto.anunciante_fantasia).distinct().count()
+    total_com_cnpj = db.query(MarcaProduto).filter(MarcaProduto.cnpj_identificado != None).count()
+
+    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    kpi1.metric("Marcas / Produtos", f"{total_marcas_db:,}")
+    kpi2.metric("Grupos Econômicos", f"{total_grupos_db:,}")
+    kpi3.metric("Anunciantes Fantasia", f"{total_anunc_db:,}")
+    taxa_cobertura = (total_com_cnpj / total_marcas_db * 100) if total_marcas_db > 0 else 0
+    kpi4.metric("Cobertura de CNPJ", f"{taxa_cobertura:.1f}%")
+
+    st.markdown("---")
+
+    # --- Seção 3: Consulta Rápida de Linhagem Societária (Buscador 360°) ---
+    st.markdown("### 🔍 Consulta de Linhagem Societária (Marca ➔ Holding)")
+    col_busc1, col_busc2 = st.columns([3, 1])
+    with col_busc1:
+        busca_termo = st.text_input("Digite o nome da Marca, Anunciante Fantasia ou Razão Social:", placeholder="Ex: BAGUARI, CELPE, VOTORAN, AUTOBAN, NOVA DUTRA...", max_chars=100)
+    with col_busc2:
+        st.write("")
+        st.write("")
+        btn_buscar = st.button("🔎 Localizar Linhagem", use_container_width=True)
+
+    if busca_termo or btn_buscar:
+        termo_limpo = busca_termo.strip()
+        resultados_busca = db.query(MarcaProduto).filter(
+            (MarcaProduto.marca.ilike(f"%{termo_limpo}%")) |
+            (MarcaProduto.anunciante_fantasia.ilike(f"%{termo_limpo}%")) |
+            (MarcaProduto.grupo_informado.ilike(f"%{termo_limpo}%")) |
+            (MarcaProduto.razao_social_identificada.ilike(f"%{termo_limpo}%"))
+        ).limit(20).all()
+
+        if resultados_busca:
+            st.markdown(f"**Encontrados {len(resultados_busca)} registros para `{termo_limpo}`:**")
+            for res in resultados_busca:
+                with st.container():
+                    st.markdown(f"""
+                    <div class='card-box'>
+                        <div style='display: flex; justify-content: space-between; align-items: center;'>
+                            <span style='font-size: 1.15rem; font-weight: bold; color: #1e3a8a;'>🏷️ Marca: {res.marca}</span>
+                            <span class='badge-ok'>Score: {res.confianca_score}% ({res.status_mapeamento})</span>
+                        </div>
+                        <div style='margin-top: 8px; color: #334155; font-size: 0.95rem;'>
+                            🏢 <b>Anunciante Fantasia:</b> {res.anunciante_fantasia} &nbsp;|&nbsp; 
+                            🏛️ <b>Grupo Econômico:</b> {res.grupo_informado}<br/>
+                            📑 <b>Razão Social Associada:</b> {res.razao_social_identificada or 'Não informada'}<br/>
+                            🔢 <b>CNPJ:</b> <code>{res.cnpj_identificado or 'Pendente'}</code> &nbsp;|&nbsp; 
+                            <b>É Matriz?:</b> {'Sim (Raiz)' if res.eh_matriz is True else ('Não (Filial)' if res.eh_matriz is False else '---')} &nbsp;|&nbsp;
+                            <b>Origem:</b> {res.origem_resolucao}
+                        </div>
+                        <div style='margin-top: 6px; font-size: 0.85rem; color: #64748b;'>
+                            💬 <i>{res.observacoes or ''}</i>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+        else:
+            st.info(f"Nenhuma ocorrência localizada para o termo `{busca_termo}`.")
+
+    st.markdown("---")
+
+    # --- Seção 4: Árvore Societária Consolidada por Grupo ---
+    st.markdown("### 🏛️ Visão Estrutural por Grupo Econômico (Holding 360°)")
+
+    holdings_data = get_holding_360_view(db)
+    if not holdings_data:
+        st.info("Nenhuma marca ou grupo importado ainda. Carregue o arquivo `CNPJ_2808 - Marca Fantasia.xlsx` na seção de carga acima.")
+    else:
+        for grp in holdings_data:
+            with st.expander(f"🏢 **{grp['grupo_nome']}** — {grp['total_marcas']} Marcas / Produtos | {grp['total_anunciantes']} Anunciantes Fantasia | {grp['total_cnpjs']} CNPJs Identificados", expanded=False):
+                st.markdown(f"**CNPJs do Grupo:** " + ", ".join([f"`{c}`" for c in grp["cnpjs"]]))
+                st.markdown(f"**Razões Sociais:** " + ", ".join([f"_{r}_" for r in grp["razoes_sociais"]]))
+                st.markdown("---")
+
+                emp_table = []
+                for emp in grp["empresas_detalhadas"]:
+                    emp_table.append({
+                        "Anunciante Fantasia": emp["anunciante_fantasia"],
+                        "Razão Social Associada": emp["razao_social"],
+                        "CNPJ": emp["cnpj"],
+                        "É Matriz?": "Sim (Raiz)" if emp["eh_matriz"] is True else ("Não (Filial)" if emp["eh_matriz"] is False else "---"),
+                        "Total de Marcas": len(emp["marcas"]),
+                        "Marcas / Produtos Mapeados": ", ".join(emp["marcas"][:8]) + ("..." if len(emp["marcas"]) > 8 else "")
+                    })
+
+                st.dataframe(pd.DataFrame(emp_table), use_container_width=True, hide_index=True)
+
+    st.markdown("---")
+
+    # --- Seção 5: Tabela Completa e Exportação de Relatórios Societários ---
+    st.markdown("### 📥 Relatório Consolidado de Marcas & Grupos Econômicos")
+    
+    filtro_grupo = st.selectbox("Filtrar por Grupo:", ["TODOS"] + [g["grupo_nome"] for g in holdings_data]) if holdings_data else "TODOS"
+
+    query_tab = db.query(MarcaProduto)
+    if filtro_grupo != "TODOS":
+        query_tab = query_tab.filter(MarcaProduto.grupo_informado == filtro_grupo)
+    
+    registros_marcas = query_tab.all()
+
+    if registros_marcas:
+        marcas_df = pd.DataFrame([{
+            "ID": m.id,
+            "Marca / Produto": m.marca,
+            "Anunciante Fantasia": m.anunciante_fantasia,
+            "Grupo Econômico": m.grupo_informado,
+            "CNPJ Identificado": m.cnpj_identificado or "---",
+            "É Matriz?": "Verdadeiro" if m.eh_matriz is True else ("Falso" if m.eh_matriz is False else "---"),
+            "Razão Social": m.razao_social_identificada or "---",
+            "Origem Resolução": m.origem_resolucao,
+            "Score Confiança": f"{m.confianca_score}%",
+            "Status": m.status_mapeamento
+        } for m in registros_marcas])
+
+        st.dataframe(marcas_df, use_container_width=True, hide_index=True)
+
+        col_exp1, col_exp2 = st.columns(2)
+        with col_exp1:
+            csv_marca_bytes = marcas_df.to_csv(index=False, encoding="utf-8-sig").encode("utf-8-sig")
+            st.download_button(
+                label="📄 Baixar Mapeamento de Marcas & Grupos (CSV)",
+                data=csv_marca_bytes,
+                file_name=f"mapeamento_marcas_grupos_{filtro_grupo.lower().replace(' ', '_')}.csv",
+                mime="text/csv",
+                type="primary",
+                key="btn_csv_marca_exp"
+            )
+        with col_exp2:
+            excel_m_buf = io.BytesIO()
+            with pd.ExcelWriter(excel_m_buf, engine="openpyxl") as wr:
+                marcas_df.to_excel(wr, index=False, sheet_name="Marcas_Holdings_360")
+            st.download_button(
+                label="📊 Baixar Mapeamento de Marcas & Grupos (Excel .xlsx)",
+                data=excel_m_buf.getvalue(),
+                file_name=f"mapeamento_marcas_grupos_{filtro_grupo.lower().replace(' ', '_')}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key="btn_xlsx_marca_exp"
+            )
+
 db.close()
+

@@ -15,8 +15,15 @@ from core.cnpj_engine import (
     extract_cnpj_root,
     generate_cnpj
 )
+from core.group_engine import (
+    resolve_brand_and_group,
+    get_holding_360_view,
+    match_group_by_name,
+    CONGLOMERADOS_CONHECIDOS
+)
 from services.enrichment import enrich_cnpj_info
 from processors.batch_processor import process_batch_file
+from processors.marca_processor import process_marca_file
 
 
 class TestValidadorCNPJ(unittest.TestCase):
@@ -103,6 +110,57 @@ class TestValidadorCNPJ(unittest.TestCase):
         # Verifica presenca de conflitos de marcas compartilhando CNPJ (duplicados)
         dups = [o for o in objs if o.tipo_divergencia == "CNPJ_DUPLICADO_OUTRA_RAZAO"]
         self.assertGreater(len(dups), 0)
+
+    def test_group_matching_and_resolution(self):
+        # 1. Validação CCR
+        res_ccr = resolve_brand_and_group(
+            marca="AUTOBAN",
+            anunciante_fantasia="AUTOBAN",
+            grupo_informado="GRUPO CCR",
+            db=self.db
+        )
+        self.assertEqual(res_ccr["status_mapeamento"], "MAPEADO_OK")
+        self.assertEqual(res_ccr["cnpj_identificado"], "02.451.648/0001-44")
+        self.assertTrue(res_ccr["eh_matriz"])
+
+        # 2. Validação Neoenergia
+        res_neo = resolve_brand_and_group(
+            marca="AFLUENTE GERACAO",
+            anunciante_fantasia="AFLUENTE",
+            grupo_informado="GRUPO NEOENERGIA",
+            db=self.db
+        )
+        self.assertEqual(res_neo["status_mapeamento"], "MAPEADO_OK")
+        self.assertEqual(res_neo["cnpj_identificado"], "10.338.472/0001-20")
+
+        # 3. Validação Votorantim
+        res_vot = resolve_brand_and_group(
+            marca="VOTORAN",
+            anunciante_fantasia="VOTORAN",
+            grupo_informado="VOTORANTIM",
+            db=self.db
+        )
+        self.assertEqual(res_vot["status_mapeamento"], "MAPEADO_OK")
+        self.assertEqual(res_vot["cnpj_identificado"], "01.637.895/0030-77")
+
+    def test_marca_batch_processor_and_360_view(self):
+        excel_path = "/home/efonseca/workspace/Validador CNPJ/data/CNPJ_2808 - Marca Fantasia.xlsx"
+        self.assertTrue(os.path.exists(excel_path))
+
+        lote, marcas_list = process_marca_file(excel_path, "CNPJ_2808 - Marca Fantasia.xlsx", self.db)
+        self.assertIsNotNone(lote.id)
+        self.assertEqual(lote.total_linhas, 483)
+        self.assertEqual(lote.total_mapeados, 483)
+        self.assertEqual(lote.total_pendentes, 0)
+
+        # Valida View 360
+        holdings = get_holding_360_view(self.db)
+        self.assertGreaterEqual(len(holdings), 3)
+
+        nomes_grupos = [h["grupo_nome"] for h in holdings]
+        self.assertIn("GRUPO CCR", nomes_grupos)
+        self.assertIn("GRUPO NEOENERGIA", nomes_grupos)
+        self.assertIn("VOTORANTIM", nomes_grupos)
 
 
 if __name__ == "__main__":
