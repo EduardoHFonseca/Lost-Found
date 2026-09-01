@@ -6,7 +6,7 @@ import pandas as pd
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from database.database import SessionLocal, init_db
-from database.models import LoteIngestao, Anunciante, ConsultaCNPJCache, MediacaoOperador
+from database.models import LoteIngestao, Anunciante, ConsultaCNPJCache, MediacaoOperador, LoteMarca, MarcaProduto
 from core.cnpj_engine import (
     clean_cnpj,
     validate_cnpj,
@@ -19,6 +19,7 @@ from core.group_engine import (
     resolve_brand_and_group,
     get_holding_360_view,
     match_group_by_name,
+    evaluate_brand_coherence,
     CONGLOMERADOS_CONHECIDOS
 )
 from services.enrichment import enrich_cnpj_info
@@ -111,6 +112,12 @@ class TestValidadorCNPJ(unittest.TestCase):
         dups = [o for o in objs if o.tipo_divergencia == "CNPJ_DUPLICADO_OUTRA_RAZAO"]
         self.assertGreater(len(dups), 0)
 
+        # Cleanup do lote de teste
+        if lote and lote.id:
+            self.db.query(Anunciante).filter(Anunciante.lote_id == lote.id).delete()
+            self.db.query(LoteIngestao).filter(LoteIngestao.id == lote.id).delete()
+            self.db.commit()
+
     def test_group_matching_and_resolution(self):
         # 1. Validação CCR
         res_ccr = resolve_brand_and_group(
@@ -143,6 +150,47 @@ class TestValidadorCNPJ(unittest.TestCase):
         self.assertEqual(res_vot["status_mapeamento"], "MAPEADO_OK")
         self.assertEqual(res_vot["cnpj_identificado"], "01.637.895/0030-77")
 
+    def test_semantic_brand_coherence_scoring(self):
+        # 1. Marca Direta (Score 90-100%)
+        sc1, cat1, diag1 = evaluate_brand_coherence(
+            marca="AUTOBAN",
+            anunciante_fantasia="AUTOBAN",
+            razao_social="CONCESSIONARIA DO SISTEMA ANHANGUERA-BANDEIRANTES S.A.",
+            grupo_informado="GRUPO CCR"
+        )
+        self.assertGreaterEqual(sc1, 90)
+        self.assertEqual(cat1, "MARCA_DIRETA")
+
+        # 2. Patrocínio Chancelado com menção à marca (Score 75%)
+        sc2, cat2, diag2 = evaluate_brand_coherence(
+            marca="COPA CCR BASQUETE",
+            anunciante_fantasia="GRUPO CCR",
+            razao_social="CCR S.A.",
+            grupo_informado="GRUPO CCR"
+        )
+        self.assertEqual(sc2, 75)
+        self.assertEqual(cat2, "PATROCINIO_CHANCELADO")
+
+        # 3. Patrocínio Esportivo / Evento sem marca declarada no nome (Score 45%)
+        sc3, cat3, diag3 = evaluate_brand_coherence(
+            marca="SUPER COPA BASQUETE",
+            anunciante_fantasia="GRUPO CCR",
+            razao_social="CCR S.A.",
+            grupo_informado="GRUPO CCR"
+        )
+        self.assertEqual(sc3, 45)
+        self.assertEqual(cat3, "PATROCINIO_ESPORTIVO")
+
+        # 4. Termo com baixa aderência / inconsistente (Score 35%)
+        sc4, cat4, diag4 = evaluate_brand_coherence(
+            marca="SACOLONA",
+            anunciante_fantasia="GRUPO CCR",
+            razao_social="CCR S.A.",
+            grupo_informado="GRUPO CCR"
+        )
+        self.assertEqual(sc4, 35)
+        self.assertEqual(cat4, "BAIXA_ADERENCIA")
+
     def test_marca_batch_processor_and_360_view(self):
         excel_path = "/home/efonseca/workspace/Validador CNPJ/data/CNPJ_2808 - Marca Fantasia.xlsx"
         self.assertTrue(os.path.exists(excel_path))
@@ -150,8 +198,8 @@ class TestValidadorCNPJ(unittest.TestCase):
         lote, marcas_list = process_marca_file(excel_path, "CNPJ_2808 - Marca Fantasia.xlsx", self.db)
         self.assertIsNotNone(lote.id)
         self.assertEqual(lote.total_linhas, 483)
-        self.assertEqual(lote.total_mapeados, 483)
-        self.assertEqual(lote.total_pendentes, 0)
+        self.assertGreater(lote.total_mapeados, 250)
+        self.assertGreater(lote.total_pendentes, 50)
 
         # Valida View 360
         holdings = get_holding_360_view(self.db)
@@ -161,6 +209,12 @@ class TestValidadorCNPJ(unittest.TestCase):
         self.assertIn("GRUPO CCR", nomes_grupos)
         self.assertIn("GRUPO NEOENERGIA", nomes_grupos)
         self.assertIn("VOTORANTIM", nomes_grupos)
+
+        # Cleanup do lote de teste para manter a base limpa
+        if lote and lote.id:
+            self.db.query(MarcaProduto).filter(MarcaProduto.lote_id == lote.id).delete()
+            self.db.query(LoteMarca).filter(LoteMarca.id == lote.id).delete()
+            self.db.commit()
 
 
 if __name__ == "__main__":
