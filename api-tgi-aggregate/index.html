@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TGI Analytics Dashboard | BASE TRIAL BRASIL</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+              900: '#7c2d12',
+            },
+            slate: {
+              850: '#151f32',
+              900: '#0f172a',
+              950: '#020617',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .badge-glow {
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.35);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-orange-500 selection:text-white">
+
+  <!-- Top Navbar -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-600/20">
+          <i data-lucide="bar-chart-3" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-base font-bold text-white tracking-tight">TGI Latina Services</h1>
+            <span class="text-[10px] uppercase font-semibold tracking-wider bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded border border-orange-500/30">API v3</span>
+          </div>
+          <p class="text-xs text-slate-400">BASE TRIAL BRASIL &bull; Panorama de Informações</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <!-- Status Indicator -->
+        <div id="connectionStatusBadge" class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 badge-glow">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>API Conectada</span>
+        </div>
+
+        <!-- Active User Badge -->
+        <div id="activeUserBadge" class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800/80 border border-slate-700 text-slate-300">
+          <i data-lucide="user" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span id="activeUserText" class="font-mono">Não autenticado</span>
+        </div>
+
+        <!-- Credentials Config Button -->
+        <button onclick="openAuthModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-sm">
+          <i data-lucide="key" class="w-3.5 h-3.5 text-orange-400"></i>
+          <span>Credenciais</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Alert / Notice Banner -->
+    <div class="bg-gradient-to-r from-orange-950/40 via-slate-900/60 to-slate-900/40 border border-orange-500/20 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
+      <div class="flex items-start space-x-3.5">
+        <div class="p-2 bg-orange-500/10 text-orange-400 rounded-xl mt-0.5">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h2 class="text-sm font-semibold text-white">Ambiente Master Liberado &bull; Company ACCS: <span class="font-mono text-orange-400">_TGI_Latina</span></h2>
+          <p class="text-xs text-slate-400 mt-0.5">
+            Acesso master configurado para América Latina com expiração em <span class="text-slate-200 font-semibold">2050</span>. Usuários autorizados: <span class="text-slate-300">eduardo.fonseca@ibope.com</span> e <span class="text-slate-300">antonio@ibope.com</span>.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2 w-full md:w-auto shrink-0">
+        <a href="https://www.tgicloudservices.com/tgiapiv3/Guide/" target="_blank" rel="noopener noreferrer" class="text-xs flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 transition">
+          <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+          <span>Guia Oficial</span>
+        </a>
+        <a href="https://www.tgicloudservices.com/tgiapiv3" target="_blank" rel="noopener noreferrer" class="text-xs flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 text-orange-300 border border-orange-500/30 transition">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          <span>Swagger v3</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Overview Metadados (Cards) -->
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-lg font-bold text-white tracking-tight">Metadados & Parâmetros da Base</h2>
+          <p class="text-xs text-slate-400">Identificadores técnicos para chamadas na TGI Cloud Services API</p>
+        </div>
+        <button onclick="loadSurveyInfo()" class="text-xs text-slate-400 hover:text-orange-400 flex items-center space-x-1 transition">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          <span>Atualizar</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: Estudo -->
+        <div class="glass-card rounded-2xl p-5 hover:border-slate-700 transition">
+          <div class="flex items-center justify-between text-slate-400 mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider">Estudo / Pesquisa</span>
+            <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
+              <i data-lucide="database" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-lg font-bold text-white" id="metaSurveyTitle">BASE TRIAL BRASIL</div>
+          <div class="text-xs font-mono text-slate-400 mt-1" id="metaSurveyName">capacitabr2023r4__pw_cl</div>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Última Publicação:</span>
+            <span class="font-medium text-slate-200" id="metaLastPublished">23-07-2026</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Amostra -->
+        <div class="glass-card rounded-2xl p-5 hover:border-slate-700 transition">
+          <div class="flex items-center justify-between text-slate-400 mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider">Amostra Entrevistada</span>
+            <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
+              <i data-lucide="users" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-2xl font-bold text-emerald-400 font-mono" id="metaSampleSize">24.576</div>
+          <div class="text-xs text-slate-400 mt-1">Respondentes / Casos Reais</div>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Unidades Amostrais:</span>
+            <span class="font-medium text-slate-200" id="metaFieldworkUnits">5 Units</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Parâmetros Técnicos -->
+        <div class="glass-card rounded-2xl p-5 hover:border-slate-700 transition">
+          <div class="flex items-center justify-between text-slate-400 mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider">Survey Family & Wave</span>
+            <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg">
+              <i data-lucide="cpu" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="text-sm font-bold text-white font-mono" id="metaSurveyFamily">bratgiptb</div>
+          <div class="text-xs font-mono text-purple-400 mt-1" id="metaWaveName">wave: treinamento2_p</div>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Copyright:</span>
+            <span class="font-medium text-slate-200 truncate ml-2">TGI LATINA &bull; Kantar</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Idiomas & Expiração -->
+        <div class="glass-card rounded-2xl p-5 hover:border-slate-700 transition">
+          <div class="flex items-center justify-between text-slate-400 mb-3">
+            <span class="text-xs font-semibold uppercase tracking-wider">Idiomas & Licença</span>
+            <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+            </div>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-slate-800 text-amber-300 border border-amber-500/30">ptb (PT)</span>
+            <span class="px-2 py-0.5 rounded text-xs font-medium bg-slate-800/80 text-slate-400 border border-slate-700">esp</span>
+            <span class="px-2 py-0.5 rounded text-xs font-medium bg-slate-800/80 text-slate-400 border border-slate-700">eng</span>
+          </div>
+          <div class="text-xs text-slate-400 mt-2">Padrão ISO 639 (ptb default)</div>
+          <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Validade da Chave:</span>
+            <span class="font-semibold text-emerald-400">Ano 2050 (Ativo)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARD ESPECIAL: DADOS DE STREAMING (VÍDEO & MÚSICA) & PERFIL HOMENS / MULHERES -->
+    <section class="glass-card rounded-2xl p-6 border-2 border-orange-500/40 shadow-xl relative overflow-hidden">
+      <div class="absolute -right-16 -top-16 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <!-- Card Header com toggle -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-800 relative z-10">
+        <div class="flex items-start space-x-3.5">
+          <div class="p-3 bg-gradient-to-tr from-orange-600 to-amber-500 text-white rounded-xl shadow-lg shadow-orange-600/30">
+            <i data-lucide="play-circle" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h2 class="text-lg font-bold text-white tracking-tight">Streaming &bull; Audiência & Divisão de Gênero (% Homens / Mulheres)</h2>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Card Aberto</span>
+            </div>
+            <p class="text-xs text-slate-300 mt-0.5">
+              Dados oficiais computados diretamente via API TGI para Vídeo Streaming (Netflix, Prime Video, etc.) e Streaming de Música (Spotify, etc.).
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2 shrink-0">
+          <button onclick="toggleStreamingCardDetails()" id="btnToggleStreaming" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+            <i data-lucide="chevron-up" id="streamingToggleIcon" class="w-4 h-4"></i>
+            <span id="streamingToggleText">Recolher</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Conteúdo Detalhado de Streaming -->
+      <div id="streamingCardDetails" class="mt-6 space-y-6 relative z-10">
+
+        <!-- Grid de 2 Grandes Categorias: Vídeo Streaming vs Música Streaming -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- Bloco 1: Vídeo Streaming (Pago U30d) -->
+          <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div class="flex items-center space-x-2.5">
+                <div class="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg">
+                  <i data-lucide="tv" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-white">Streaming de Vídeo Pago (Últimos 30 Dias)</h3>
+                  <div class="text-[11px] font-mono text-slate-400">Keyword base: <code>14W157052183</code></div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-bold font-mono text-white">50.093,05 mil</div>
+                <div class="text-[10px] text-slate-400">Penetração: <span class="text-indigo-400 font-semibold">54,68%</span> da pop.</div>
+              </div>
+            </div>
+
+            <!-- KPI % Homens vs Mulheres -->
+            <div class="mt-4 space-y-3">
+              <div class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                <span>Distribuição por Sexo:</span>
+                <span class="text-[11px] font-mono text-slate-400">Amostra: 13.918 respondentes</span>
+              </div>
+
+              <!-- Barra de Distribuição Visual -->
+              <div class="h-4 w-full bg-slate-800 rounded-full overflow-hidden flex shadow-inner">
+                <div class="bg-gradient-to-r from-blue-600 to-cyan-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 47.69%">
+                  47,7%
+                </div>
+                <div class="bg-gradient-to-r from-fuchsia-600 to-pink-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 52.31%">
+                  52,3%
+                </div>
+              </div>
+
+              <!-- Detalhamento Homens / Mulheres em 2 Cards -->
+              <div class="grid grid-cols-2 gap-3 pt-1">
+                <!-- Homens -->
+                <div class="bg-slate-950/60 border border-blue-500/30 rounded-xl p-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-blue-400 flex items-center space-x-1">
+                      <i data-lucide="user" class="w-3 h-3"></i>
+                      <span>Homens</span>
+                    </span>
+                    <span class="text-base font-black font-mono text-white">47,7%</span>
+                  </div>
+                  <div class="text-[11px] font-mono text-slate-300 mt-1">23.891,37 mil</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5">Amostra: 6.579 casos</div>
+                  <button onclick="setExpression('14W157052183 AND MDPDSXMS', 'Vídeo Pago - Homens')" class="mt-2 text-[10px] text-blue-400 hover:text-blue-300 hover:underline flex items-center space-x-1">
+                    <i data-lucide="corner-down-right" class="w-2.5 h-2.5"></i>
+                    <span>Consultar no Painel</span>
+                  </button>
+                </div>
+
+                <!-- Mulheres -->
+                <div class="bg-slate-950/60 border border-pink-500/30 rounded-xl p-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-pink-400 flex items-center space-x-1">
+                      <i data-lucide="user" class="w-3 h-3"></i>
+                      <span>Mulheres</span>
+                    </span>
+                    <span class="text-base font-black font-mono text-white">52,3%</span>
+                  </div>
+                  <div class="text-[11px] font-mono text-slate-300 mt-1">26.201,68 mil</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5">Amostra: 7.339 casos</div>
+                  <button onclick="setExpression('14W157052183 AND MDPDSXFM', 'Vídeo Pago - Mulheres')" class="mt-2 text-[10px] text-pink-400 hover:text-pink-300 hover:underline flex items-center space-x-1">
+                    <i data-lucide="corner-down-right" class="w-2.5 h-2.5"></i>
+                    <span>Consultar no Painel</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Destaque Netflix -->
+              <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-xs bg-slate-950/40 rounded-xl p-2.5">
+                <div class="flex items-center space-x-2">
+                  <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                  <span class="font-semibold text-white">Netflix (U30d):</span>
+                  <span class="text-slate-400 font-mono">41.298,81 mil</span>
+                </div>
+                <div class="flex items-center space-x-2 font-mono text-[11px]">
+                  <span class="text-blue-400 font-semibold">♂ 46,6%</span>
+                  <span class="text-slate-600">&bull;</span>
+                  <span class="text-pink-400 font-semibold">♀ 53,4%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bloco 2: Streaming de Música (Costuma Ouvir) -->
+          <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div class="flex items-center space-x-2.5">
+                <div class="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg">
+                  <i data-lucide="music" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-white">Streaming de Música (Costuma Ouvir)</h3>
+                  <div class="text-[11px] font-mono text-slate-400">Keyword base: <code>B221542445</code></div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-bold font-mono text-white">47.030,41 mil</div>
+                <div class="text-[10px] text-slate-400">Penetração: <span class="text-emerald-400 font-semibold">51,33%</span> da pop.</div>
+              </div>
+            </div>
+
+            <!-- KPI % Homens vs Mulheres -->
+            <div class="mt-4 space-y-3">
+              <div class="text-xs font-semibold text-slate-300 flex items-center justify-between">
+                <span>Distribuição por Sexo:</span>
+                <span class="text-[11px] font-mono text-slate-400">Amostra: 12.873 respondentes</span>
+              </div>
+
+              <!-- Barra de Distribuição Visual -->
+              <div class="h-4 w-full bg-slate-800 rounded-full overflow-hidden flex shadow-inner">
+                <div class="bg-gradient-to-r from-blue-600 to-cyan-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 49.21%">
+                  49,2%
+                </div>
+                <div class="bg-gradient-to-r from-fuchsia-600 to-pink-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 50.79%">
+                  50,8%
+                </div>
+              </div>
+
+              <!-- Detalhamento Homens / Mulheres em 2 Cards -->
+              <div class="grid grid-cols-2 gap-3 pt-1">
+                <!-- Homens -->
+                <div class="bg-slate-950/60 border border-blue-500/30 rounded-xl p-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-blue-400 flex items-center space-x-1">
+                      <i data-lucide="user" class="w-3 h-3"></i>
+                      <span>Homens</span>
+                    </span>
+                    <span class="text-base font-black font-mono text-white">49,2%</span>
+                  </div>
+                  <div class="text-[11px] font-mono text-slate-300 mt-1">23.143,47 mil</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5">Amostra: 6.281 casos</div>
+                  <button onclick="setExpression('B221542445 AND MDPDSXMS', 'Música - Homens')" class="mt-2 text-[10px] text-blue-400 hover:text-blue-300 hover:underline flex items-center space-x-1">
+                    <i data-lucide="corner-down-right" class="w-2.5 h-2.5"></i>
+                    <span>Consultar no Painel</span>
+                  </button>
+                </div>
+
+                <!-- Mulheres -->
+                <div class="bg-slate-950/60 border border-pink-500/30 rounded-xl p-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-pink-400 flex items-center space-x-1">
+                      <i data-lucide="user" class="w-3 h-3"></i>
+                      <span>Mulheres</span>
+                    </span>
+                    <span class="text-base font-black font-mono text-white">50,8%</span>
+                  </div>
+                  <div class="text-[11px] font-mono text-slate-300 mt-1">23.886,94 mil</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5">Amostra: 6.592 casos</div>
+                  <button onclick="setExpression('B221542445 AND MDPDSXFM', 'Música - Mulheres')" class="mt-2 text-[10px] text-pink-400 hover:text-pink-300 hover:underline flex items-center space-x-1">
+                    <i data-lucide="corner-down-right" class="w-2.5 h-2.5"></i>
+                    <span>Consultar no Painel</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Destaque Spotify -->
+              <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-xs bg-slate-950/40 rounded-xl p-2.5">
+                <div class="flex items-center space-x-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span class="font-semibold text-white">Spotify (U30d):</span>
+                  <span class="text-slate-400 font-mono">28.209,49 mil</span>
+                </div>
+                <div class="flex items-center space-x-2 font-mono text-[11px]">
+                  <span class="text-blue-400 font-semibold">♂ 48,9%</span>
+                  <span class="text-slate-600">&bull;</span>
+                  <span class="text-pink-400 font-semibold">♀ 51,1%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Síntese de Comparação Rápida -->
+        <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+          <div class="flex items-center space-x-2.5">
+            <span class="p-1.5 bg-orange-500/10 text-orange-400 rounded-lg">
+              <i data-lucide="info" class="w-4 h-4"></i>
+            </span>
+            <span class="text-slate-300">
+              População total de referência: <strong>91.616,00 mil</strong> indivíduos no Brasil (Homens: <strong>48,11%</strong> | Mulheres: <strong>51,89%</strong>).
+            </span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="setExpression('14W157052183', 'Total Vídeo Streaming Pago')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-mono text-[11px]">
+              Vídeo Total (54,68%)
+            </button>
+            <button onclick="setExpression('B221542445', 'Total Streaming Música')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-mono text-[11px]">
+              Música Total (51,33%)
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Calculador de Métricas Oficiais da API TGI (Expressões) -->
+    <section class="glass-card rounded-2xl p-6 border border-slate-800">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="p-1.5 rounded-lg bg-orange-500/10 text-orange-400">
+              <i data-lucide="calculator" class="w-4 h-4"></i>
+            </span>
+            <h2 class="text-base font-bold text-white">Consulta Rápida de Expressão & Métricas Oficiais</h2>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">
+            Consulte diretamente o endpoint <code class="font-mono text-orange-400 bg-slate-900 px-1.5 py-0.5 rounded text-[11px]">POST /report/expression</code> para obter projeções e amostras instantâneas
+          </p>
+        </div>
+
+        <!-- Benchmark Presets -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-500">Exemplos:</span>
+          <button onclick="setExpression('MDPDECCA', 'Casado(a)')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">Casados (MDPDECCA)</button>
+          <button onclick="setExpression('MDPDECSO', 'Solteiro(a)')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">Solteiros (MDPDECSO)</button>
+          <button onclick="setExpression('MDPDECEP', 'Com Companheiro(a)')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">União Estável (MDPDECEP)</button>
+          <button onclick="setExpression('MDPDECVI', 'Viúvo(a)')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">Viúvos (MDPDECVI)</button>
+        </div>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Input Form -->
+        <div class="lg:col-span-5 space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Código da Expressão TGI</label>
+            <div class="relative">
+              <input type="text" id="inputExpression" value="MDPDECCA" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500" placeholder="Ex: MDPDECCA ou DBSEXLME">
+              <span id="exprLabelHelper" class="absolute right-3 top-2.5 text-xs text-slate-400">Casado(a)</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-1.5">
+              Suporta operadores lógicos padrão TGI: <code class="text-orange-400 font-mono">AND</code>, <code class="text-orange-400 font-mono">OR</code>, <code class="text-orange-400 font-mono">NOT</code>.
+            </p>
+          </div>
+
+          <button id="btnRunExpression" onclick="executeExpression()" class="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-medium py-2.5 px-4 rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-lg shadow-orange-600/20">
+            <i data-lucide="play" class="w-3.5 h-3.5"></i>
+            <span>Consultar Métricas na API</span>
+          </button>
+        </div>
+
+        <!-- Output Cards Grid -->
+        <div class="lg:col-span-7">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <!-- (000) Projeção -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5">
+              <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Projeção (000)</div>
+              <div class="text-xl font-bold font-mono text-amber-400 mt-1" id="resPopProjection">25.324,71</div>
+              <div class="text-[10px] text-slate-500 mt-1">Milhares de indivíduos</div>
+            </div>
+
+            <!-- Sample -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5">
+              <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Amostra (Sample)</div>
+              <div class="text-xl font-bold font-mono text-emerald-400 mt-1" id="resSample">7.173</div>
+              <div class="text-[10px] text-slate-500 mt-1">Respondentes na pesquisa</div>
+            </div>
+
+            <!-- Horizontal % -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5">
+              <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Horizontal %</div>
+              <div class="text-xl font-bold font-mono text-cyan-400 mt-1" id="resHorzPercent">27,64%</div>
+              <div class="text-[10px] text-slate-500 mt-1">Penetração na base</div>
+            </div>
+
+            <!-- Vertical % -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5">
+              <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Vertical %</div>
+              <div class="text-xl font-bold font-mono text-purple-400 mt-1" id="resVertPercent">100,00%</div>
+              <div class="text-[10px] text-slate-500 mt-1">Composição do filtro</div>
+            </div>
+
+            <!-- Index -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5">
+              <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Índice (Index)</div>
+              <div class="text-xl font-bold font-mono text-orange-400 mt-1" id="resIndex">100</div>
+              <div class="text-[10px] text-slate-500 mt-1">Base 100 = média</div>
+            </div>
+
+            <!-- Status de Resposta -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between">
+              <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Resposta API</div>
+              <div class="flex items-center space-x-1.5 text-xs text-emerald-400 font-mono mt-1" id="resStatusCode">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>200 OK</span>
+              </div>
+              <div class="text-[10px] text-slate-500 font-mono truncate mt-1" id="resExprEcho">expr: MDPDECCA</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mapa Geral de Setores e Dicionário (38 Categorias Principais) -->
+    <section class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div>
+          <h2 class="text-lg font-bold text-white tracking-tight">Mapa Setorial da Pesquisa (38 Categorias TGI Brasil)</h2>
+          <p class="text-xs text-slate-400">Estrutura de variáveis organizadas por pilares temáticos do estudo</p>
+        </div>
+        <div class="text-xs text-slate-400 font-mono bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg">
+          Nível Root &bull; Total: 38 Setores
+        </div>
+      </div>
+
+      <!-- Setores Categorizados em Abas / Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="categoriesGrid">
+        <!-- JS irá preencher as 38 categorias formatadas com badges -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 bg-slate-950/80 py-6 mt-12 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2">
+        <span>TGI Cloud Services &bull; Kantar / IBOPE</span>
+        <span>&bull;</span>
+        <span class="text-slate-400">Company Master _TGI_Latina</span>
+      </div>
+      <div>
+        <span>Dashboard estático de conferência &bull; Publicado via <strong class="text-slate-400">here.now</strong></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal de Credenciais (Segurança: armazenadas somente no localStorage) -->
+  <div id="authModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center space-x-2.5">
+          <div class="p-2 bg-orange-500/10 text-orange-400 rounded-xl">
+            <i data-lucide="key-round" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Configuração de Credenciais</h3>
+            <p class="text-xs text-slate-400">Armazenamento local restrito (OWASP / Client-Side)</p>
+          </div>
+        </div>
+        <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-200">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="mt-5 space-y-4">
+        <!-- API Key Input -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">API Key (TGI Cloud Services)</label>
+          <input type="password" id="modalApiKey" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-orange-500" placeholder="Cole sua API Key da TGI">
+          <p class="text-[11px] text-slate-400 mt-1">A chave é gravada estritamente no <code class="text-orange-400 font-mono">localStorage</code> do seu navegador.</p>
+        </div>
+
+        <!-- User Selector -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Usuário Autorizado</label>
+          <select id="modalUserId" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-orange-500">
+            <option value="eduardo.fonseca@ibope.com">eduardo.fonseca@ibope.com</option>
+            <option value="antonio@ibope.com">antonio@ibope.com</option>
+          </select>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="pt-2 flex items-center space-x-3">
+          <button onclick="saveAndTestCredentials()" class="flex-1 bg-orange-600 hover:bg-orange-500 text-white font-medium py-2.5 px-4 rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-orange-600/20">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+            <span>Salvar & Testar Conexão</span>
+          </button>
+          <button onclick="clearCredentials()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition border border-slate-700">
+            Limpar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configurações e Estado
+    const API_BASE = 'https://www.tgicloudservices.com/tgiapiv3/aggregate_api';
+    const SURVEY_FAMILY = 'bratgiptb';
+    const WAVE_NAME = 'treinamento2_p';
+    const LANGUAGE = 'ptb';
+
+    // Setores pré-mapeados da BASE TRIAL BRASIL
+    const TGI_SECTORS = [
+      { id: 430, label: 'DADOS DEMOGRÁFICOS', keyword: 'DEMOGRAP', section: 'Demografia', icon: 'users', color: 'blue' },
+      { id: 2890, label: 'PERGUNTAS SENSÍVEIS', keyword: 'SENSQUEST', section: 'Demografia', icon: 'lock', color: 'blue' },
+      { id: 3133, label: 'JORNAIS', keyword: 'NEWSPAPER', section: 'Mídia', icon: 'newspaper', color: 'indigo' },
+      { id: 7008, label: 'TELEVISÃO', keyword: 'TELEVISION', section: 'Mídia', icon: 'tv', color: 'indigo' },
+      { id: 18043, label: 'REVISTAS', keyword: 'MAGAZINES', section: 'Mídia', icon: 'book-open', color: 'indigo' },
+      { id: 19837, label: 'CINEMA', keyword: 'CINEMA', section: 'Mídia', icon: 'film', color: 'indigo' },
+      { id: 20094, label: 'INTERNET', keyword: 'INTERNET', section: 'Mídia', icon: 'globe', color: 'indigo' },
+      { id: 23629, label: 'RÁDIO/ STREAMING DE MÚSICA/ PODCAST', keyword: 'RADIO', section: 'Mídia', icon: 'radio', color: 'indigo' },
+      { id: 26550, label: 'MÍDIA EXTERIOR/ OUT OF HOME', keyword: 'MEDIAOUT', section: 'Mídia', icon: 'map-pin', color: 'indigo' },
+      { id: 27824, label: 'PUBLICIDADE EM GERAL', keyword: 'ADVERTIS', section: 'Publicidade', icon: 'megaphone', color: 'amber' },
+      { id: 28566, label: 'PUBLICIDADE EM PONTO DE VENDA', keyword: 'POINTSB', section: 'Publicidade', icon: 'store', color: 'amber' },
+      { id: 28578, label: 'MARKETING BOCA-A-BOCA', keyword: 'WORDOF', section: 'Publicidade', icon: 'message-circle', color: 'amber' },
+      { id: 29613, label: 'EVENTOS NA VIDA', keyword: 'LIFEEVE', section: 'Atitudes', icon: 'heart', color: 'rose' },
+      { id: 29879, label: 'CLUSTERS PREDEFINIDOS', keyword: 'PREDCLUST', section: 'Atitudes', icon: 'pie-chart', color: 'rose' },
+      { id: 30025, label: 'SEGMENTAÇÕES', keyword: 'SEGMEN', section: 'Atitudes', icon: 'layers', color: 'rose' },
+      { id: 30625, label: 'CONSUMO DE MEIOS-MEDIAGRAPHICS', keyword: 'TOTAUDMED', section: 'Mídia', icon: 'activity', color: 'indigo' },
+      { id: 31887, label: 'OPINIÕES E ATITUDES', keyword: 'OPINIONS', section: 'Atitudes', icon: 'smile', color: 'rose' },
+      { id: 36515, label: 'DIÁRIO DE ATIVIDADES', keyword: 'TIMEDIARY', section: 'Atitudes', icon: 'clock', color: 'rose' },
+      { id: 39010, label: 'VESTUÁRIO/ ACESSÓRIOS/ ARTIGOS ESPORTIVOS', keyword: 'APPAREL', section: 'Bens de Consumo', icon: 'tag', color: 'emerald' },
+      { id: 39589, label: 'AUTOMÓVEIS E MOTOS', keyword: 'AUTOMOTIVE', section: 'Bens de Consumo', icon: 'truck', color: 'emerald' },
+      { id: 41343, label: 'TELECOMUNICAÇÕES E APLICATIVOS', keyword: 'TELECOMM', section: 'Bens de Consumo', icon: 'smartphone', color: 'emerald' },
+      { id: 41846, label: 'ELETRÔNICOS', keyword: 'ELECTRON', section: 'Bens de Consumo', icon: 'monitor', color: 'emerald' },
+      { id: 42576, label: 'ELETRODOMÉSTICOS/ ELETROPORTÁTEIS', keyword: 'APPLIANC', section: 'Bens de Consumo', icon: 'zap', color: 'emerald' },
+      { id: 42830, label: 'PRODUTOS FINANCEIROS/ SEGUROS', keyword: 'FINANCIAL', section: 'Bens de Consumo', icon: 'credit-card', color: 'emerald' },
+      { id: 44349, label: 'BEBIDAS E ALIMENTOS', keyword: 'FOODRINKRP', section: 'Bens de Consumo', icon: 'coffee', color: 'emerald' },
+      { id: 48795, label: 'BEBIDAS ALCOÓLICAS', keyword: 'ALCOHOLIC', section: 'Bens de Consumo', icon: 'glass', color: 'emerald' },
+      { id: 50682, label: 'RESTAURANTES E COMPRAS', keyword: 'RESTAURANT', section: 'Bens de Consumo', icon: 'shopping-bag', color: 'emerald' },
+      { id: 51961, label: 'VIAGENS/ ATIVIDADES RECREATIVAS', keyword: 'LEISURETRAV', section: 'Atitudes', icon: 'compass', color: 'rose' },
+      { id: 54831, label: 'PRODUTOS DE HIGIENE PESSOAL', keyword: 'PERSONALTG', section: 'Bens de Consumo', icon: 'shield', color: 'emerald' },
+      { id: 59001, label: 'PRODUTOS DE BELEZA/ MAQUIAGEM', keyword: 'PRODBELM', section: 'Bens de Consumo', icon: 'sparkles', color: 'emerald' },
+      { id: 60250, label: 'PRODUTOS DE HIGIENE PESSOAL FEMININO', keyword: 'PERSONALTF', section: 'Bens de Consumo', icon: 'feather', color: 'emerald' },
+      { id: 60497, label: 'PRODUTOS DE HIGIENE PESSOAL MASCULINO', keyword: 'PERSONALTM', section: 'Bens de Consumo', icon: 'shield-check', color: 'emerald' },
+      { id: 60559, label: 'REMÉDIOS-PERGUNTAS SENSÍVEIS', keyword: 'HEALTHPH', section: 'Bens de Consumo', icon: 'plus-circle', color: 'emerald' },
+      { id: 63880, label: 'OUTROS SERVIÇOS', keyword: 'OTHERSPROD', section: 'Bens de Consumo', icon: 'briefcase', color: 'emerald' },
+      { id: 63931, label: 'BEBIDAS E ALIMENTOS (CPR)', keyword: 'FOODRINKPS', section: 'Bens de Consumo', icon: 'shopping-cart', color: 'emerald' },
+      { id: 68290, label: 'ANIMAIS DOMÉSTICOS', keyword: 'HOUSEPET', section: 'Bens de Consumo', icon: 'github', color: 'emerald' },
+      { id: 68419, label: 'PRODUTOS PARA A CASA (CPR)', keyword: 'HOUSEPROD', section: 'Bens de Consumo', icon: 'home', color: 'emerald' },
+      { id: 69557, label: 'PRODUTOS PARA BEBÊS (CPR)', keyword: 'INFANTBABY', section: 'Bens de Consumo', icon: 'baby', color: 'emerald' },
+      { id: 69678, label: 'OUTROS PRODUTOS (CPR)', keyword: 'SHOPPINGH', section: 'Bens de Consumo', icon: 'package', color: 'emerald' }
+    ];
+
+    function getApiKey() {
+      // Prioridade: parâmetro de URL (?apikey=...), localStorage ou prompt
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlKey = urlParams.get('apikey');
+      if (urlKey) {
+        localStorage.setItem('tgi_api_key', urlKey);
+        return urlKey;
+      }
+      return localStorage.getItem('tgi_api_key') || '';
+    }
+
+    function getUserId() {
+      return localStorage.getItem('tgi_user_id') || 'eduardo.fonseca@ibope.com';
+    }
+
+    function updateNavBadges() {
+      const user = getUserId();
+      document.getElementById('activeUserText').innerText = user;
+      document.getElementById('connectionStatusBadge').classList.remove('hidden');
+      document.getElementById('activeUserBadge').classList.remove('hidden');
+    }
+
+    function toggleStreamingCardDetails() {
+      const details = document.getElementById('streamingCardDetails');
+      const icon = document.getElementById('streamingToggleIcon');
+      const text = document.getElementById('streamingToggleText');
+      if (details.classList.contains('hidden')) {
+        details.classList.remove('hidden');
+        text.innerText = 'Recolher';
+        icon.setAttribute('data-lucide', 'chevron-up');
+      } else {
+        details.classList.add('hidden');
+        text.innerText = 'Abrir Detalhes';
+        icon.setAttribute('data-lucide', 'chevron-down');
+      }
+      lucide.createIcons();
+    }
+
+    function scrollToStreamingCard() {
+      const card = document.getElementById('streamingCardDetails');
+      if (card.classList.contains('hidden')) {
+        toggleStreamingCardDetails();
+      }
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function renderSectorsGrid() {
+      const container = document.getElementById('categoriesGrid');
+      container.innerHTML = TGI_SECTORS.map(sec => {
+        let badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+        if (sec.section === 'Mídia') badgeColor = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30';
+        if (sec.section === 'Publicidade') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+        if (sec.section === 'Atitudes') badgeColor = 'bg-rose-500/10 text-rose-400 border-rose-500/30';
+        if (sec.section === 'Bens de Consumo') badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+
+        const isStreaming = sec.id === 23629 || sec.label.includes('STREAMING');
+
+        return `
+          <div class="glass-card rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between ${isStreaming ? 'border-orange-500/50 bg-orange-950/20' : ''}">
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded border ${badgeColor}">
+                  ${sec.section}
+                </span>
+                <span class="text-[11px] font-mono text-slate-500">ID ${sec.id}</span>
+              </div>
+              <h4 class="text-xs font-bold text-white tracking-tight">${sec.label}</h4>
+              ${isStreaming ? `
+                <div class="mt-2 text-[11px] text-orange-400 flex items-center space-x-1 font-medium">
+                  <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+                  <span>Dados de Gênero Detalhados Acima</span>
+                </div>
+              ` : ''}
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+              <span class="text-slate-400">Keyword:</span>
+              <div class="flex items-center space-x-1.5">
+                <code class="font-mono text-orange-400 bg-slate-900 px-1.5 py-0.5 rounded">${sec.keyword}</code>
+                ${isStreaming ? `
+                  <button onclick="scrollToStreamingCard()" class="px-2 py-0.5 rounded bg-orange-600 hover:bg-orange-500 text-white font-medium text-[10px] transition">
+                    Ver %
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    async function loadSurveyInfo() {
+      const apiKey = getApiKey();
+      const userId = getUserId();
+      updateNavBadges();
+
+      try {
+        const url = `${API_BASE}/survey/${SURVEY_FAMILY}/wave/${WAVE_NAME}/info?userid=${encodeURIComponent(userId)}&apikey=${apiKey}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.results && json.results.length > 0) {
+            const data = json.results[0];
+            document.getElementById('metaSurveyTitle').innerText = data.title || 'BASE TRIAL BRASIL';
+            document.getElementById('metaSurveyName').innerText = data.name || 'capacitabr2023r4__pw_cl';
+            if (data.samplesize) {
+              const num = parseInt(data.samplesize).toLocaleString('pt-BR');
+              document.getElementById('metaSampleSize').innerText = num;
+            }
+            if (data['fieldwork-units']) {
+              document.getElementById('metaFieldworkUnits').innerText = `${data['fieldwork-units']} Unidades`;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('API fetch survey info fallback', err);
+      }
+    }
+
+    function setExpression(expr, label) {
+      document.getElementById('inputExpression').value = expr;
+      document.getElementById('exprLabelHelper').innerText = label;
+      executeExpression();
+    }
+
+    async function executeExpression() {
+      const apiKey = getApiKey();
+      const userId = getUserId();
+      const expr = document.getElementById('inputExpression').value.trim();
+      if (!expr) return;
+
+      const btn = document.getElementById('btnRunExpression');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<span class="animate-spin inline-block mr-2">&bull;</span> Consultando API...`;
+      btn.disabled = true;
+
+      try {
+        const url = `${API_BASE}/survey/${SURVEY_FAMILY}/wave/${WAVE_NAME}/report/expression?base64=false&userid=${encodeURIComponent(userId)}&apikey=${apiKey}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(expr)
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.results && json.results.data) {
+            // dt 1: (000), dt 2: Vert %, dt 3: Horz %, dt 4: Index, dt 5: Sample
+            const data = json.results.data;
+            const mapVal = {};
+            data.forEach(item => { mapVal[item.dt] = item.val; });
+
+            if (mapVal[1] !== undefined) {
+              document.getElementById('resPopProjection').innerText = mapVal[1].toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            if (mapVal[5] !== undefined) {
+              document.getElementById('resSample').innerText = parseInt(mapVal[5]).toLocaleString('pt-BR');
+            }
+            if (mapVal[3] !== undefined) {
+              document.getElementById('resHorzPercent').innerText = mapVal[3].toFixed(2).replace('.', ',') + '%';
+            }
+            if (mapVal[2] !== undefined) {
+              document.getElementById('resVertPercent').innerText = mapVal[2].toFixed(2).replace('.', ',') + '%';
+            }
+            if (mapVal[4] !== undefined) {
+              document.getElementById('resIndex').innerText = Math.round(mapVal[4]).toString();
+            }
+
+            document.getElementById('resStatusCode').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>200 OK</span>`;
+            document.getElementById('resExprEcho').innerText = `expr: ${expr}`;
+          }
+        } else {
+          document.getElementById('resStatusCode').innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span><span>${res.status} Erro</span>`;
+        }
+      } catch (e) {
+        document.getElementById('resStatusCode').innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span><span>Erro Conexão</span>`;
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        lucide.createIcons();
+      }
+    }
+
+    // Modal de Credenciais
+    function openAuthModal() {
+      document.getElementById('modalApiKey').value = localStorage.getItem('tgi_api_key') || '';
+      document.getElementById('modalUserId').value = getUserId();
+      document.getElementById('authModal').classList.remove('hidden');
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authModal').classList.add('hidden');
+    }
+
+    async function saveAndTestCredentials() {
+      const key = document.getElementById('modalApiKey').value.trim();
+      const user = document.getElementById('modalUserId').value.trim();
+      if (!key || !user) return;
+
+      localStorage.setItem('tgi_api_key', key);
+      localStorage.setItem('tgi_user_id', user);
+
+      updateNavBadges();
+      closeAuthModal();
+      await loadSurveyInfo();
+      await executeExpression();
+    }
+
+    function clearCredentials() {
+      localStorage.removeItem('tgi_api_key');
+      localStorage.removeItem('tgi_user_id');
+      document.getElementById('modalApiKey').value = '';
+      updateNavBadges();
+      alert('Credenciais locais removidas.');
+    }
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      renderSectorsGrid();
+      updateNavBadges();
+      if (!getApiKey()) {
+        openAuthModal();
+      } else {
+        loadSurveyInfo();
+        executeExpression();
+      }
+    });
+  </script>
+</body>
+</html>
