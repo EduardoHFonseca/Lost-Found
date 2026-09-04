@@ -110,8 +110,8 @@ Módulo analítico e integrador para consumo dos serviços da **TGI Cloud Servic
 
 - **Hospedagem Estática:** Publicado no **here.now**.
 - **URLs Ativas:**
-  - Versão Multi-Base com Dicionário de Variáveis: [https://plush-bloom-5dp2.here.now/](https://plush-bloom-5dp2.here.now/)
-  - Versão Legada (Base 1): [https://ancient-lagoon-j6mn.here.now/](https://ancient-lagoon-j6mn.here.now/)
+  - Versão Multi-Base com Dicionário de Variáveis (Nova): [https://supple-tassel-q97y.here.now/](https://supple-tassel-q97y.here.now/)
+  - Versões Anteriores: [https://plush-bloom-5dp2.here.now/](https://plush-bloom-5dp2.here.now/) | [https://ancient-lagoon-j6mn.here.now/](https://ancient-lagoon-j6mn.here.now/)
 - **Código Fonte do Dashboard:** Localizado em `api-tgi-aggregate/index.html`.
 - **Recursos do Dashboard:**
   - Seletor rápido de base ativa no topo (`BASE TRIAL BRASIL` vs `TG BR 2023 R3`).
