@@ -3,7 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TGI Analytics Dashboard | BASE TRIAL BRASIL & TG BR 2023 R3</title>
+  <title>Target Group Index Analytics Dashboard | BASE TRIAL BRASIL & TG BR 2023 R3</title>
+  <!-- Open Graph & Social Cards para Thumbnail e Compartilhamento -->
+  <meta property="og:title" content="Target Group Index Analytics Dashboard">
+  <meta property="og:description" content="Painel analítico e integrador de audiência e métricas oficiais Target Group Index">
+  <meta property="og:site_name" content="Target Group Index Analytics">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Target Group Index Analytics Dashboard">
+  <meta name="twitter:description" content="Painel analítico e integrador de audiência e métricas oficiais Target Group Index">
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -61,7 +69,7 @@
         </div>
         <div>
           <div class="flex items-center space-x-2">
-            <h1 class="text-base font-bold text-white tracking-tight">TGI Latina Services</h1>
+            <h1 class="text-base font-bold text-white tracking-tight">Target Group Index Latina Services</h1>
             <span class="text-[10px] uppercase font-semibold tracking-wider bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded border border-orange-500/30">API v3</span>
           </div>
           <p class="text-xs text-slate-400" id="navSubtitle">Multi-Base &bull; Panorama de Informações</p>
@@ -112,7 +120,7 @@
           <i data-lucide="shield-check" class="w-5 h-5"></i>
         </div>
         <div>
-          <h2 class="text-sm font-semibold text-white" id="bannerClientTitle">Ambiente Master Liberado &bull; Company ACCS: <span class="font-mono text-orange-400">_TGI_Latina</span></h2>
+          <h2 class="text-sm font-semibold text-white" id="bannerClientTitle">Ambiente Master Liberado &bull; Company ACCS: <span class="font-mono text-orange-400">Master Latina (Target Group Index)</span></h2>
           <p class="text-xs text-slate-400 mt-0.5" id="bannerClientDesc">
             Acesso master configurado para América Latina com expiração em <span class="text-slate-200 font-semibold">2050</span>. Usuários autorizados: <span class="text-slate-300">eduardo.fonseca@ibope.com</span>, <span class="text-slate-300">antonio@ibope.com</span> e <span class="text-slate-300">trial@apikmr.com</span>.
           </p>
@@ -135,7 +143,7 @@
       <div class="flex items-center justify-between mb-4">
         <div>
           <h2 class="text-lg font-bold text-white tracking-tight">Metadados & Parâmetros da Base</h2>
-          <p class="text-xs text-slate-400">Identificadores técnicos para chamadas na TGI Cloud Services API</p>
+          <p class="text-xs text-slate-400">Identificadores técnicos para chamadas na Target Group Index Cloud Services API</p>
         </div>
         <div class="flex items-center space-x-2">
           <span id="badgeActiveBaseIndicator" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-500/20 text-orange-400 border border-orange-500/30 font-mono">
@@ -193,7 +201,7 @@
           <div class="text-xs font-mono text-purple-400 mt-1 truncate" id="metaWaveName">wave: treinamento2_p</div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
             <span>ACCS Client:</span>
-            <span class="font-medium text-slate-200 truncate ml-2" id="metaAccsClient">_TGI_Latina</span>
+            <span class="font-medium text-slate-200 truncate ml-2" id="metaAccsClient">Master Latina (Target Group Index)</span>
           </div>
         </div>
 
@@ -235,7 +243,7 @@
               <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Card Aberto</span>
             </div>
             <p class="text-xs text-slate-300 mt-0.5">
-              Dados oficiais computados diretamente via API TGI para Vídeo Streaming (Netflix, Prime Video, etc.) e Streaming de Música (Spotify, etc.) na base selecionada.
+              Dados oficiais computados diretamente via API Target Group Index para Vídeo Streaming (Netflix, Prime Video, etc.) e Streaming de Música (Spotify, etc.) na base selecionada.
             </p>
           </div>
         </div>
@@ -455,7 +463,7 @@
       </div>
     </section>
 
-    <!-- Calculador de Métricas Oficiais da API TGI (Expressões) -->
+    <!-- Calculador de Métricas Oficiais da API Target Group Index (Expressões) -->
     <section class="glass-card rounded-2xl p-6 border border-slate-800">
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-800">
         <div>
@@ -484,13 +492,13 @@
         <!-- Input Form -->
         <div class="lg:col-span-5 space-y-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Código da Expressão TGI</label>
+            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Código da Expressão Target Group Index</label>
             <div class="relative">
               <input type="text" id="inputExpression" value="MDPDECCA" onkeydown="if(event.key === 'Enter') executeExpression()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500" placeholder="Ex: MDPDECCA ou DBSEXLME">
               <span id="exprLabelHelper" class="absolute right-3 top-2.5 text-xs text-slate-400">Casado(a)</span>
             </div>
             <p class="text-[11px] text-slate-400 mt-1.5">
-              Suporta operadores lógicos padrão TGI: <code class="text-orange-400 font-mono">AND</code>, <code class="text-orange-400 font-mono">OR</code>, <code class="text-orange-400 font-mono">NOT</code>. Pressione <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] text-slate-300">Enter</kbd> para consultar.
+              Suporta operadores lógicos padrão Target Group Index: <code class="text-orange-400 font-mono">AND</code>, <code class="text-orange-400 font-mono">OR</code>, <code class="text-orange-400 font-mono">NOT</code>. Pressione <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] text-slate-300">Enter</kbd> para consultar.
             </p>
           </div>
 
@@ -585,7 +593,7 @@
       </div>
     </section>
 
-    <!-- NOVO: DICIONÁRIO DE VARIÁVEIS & BUSCADOR DE EXPRESSÕES TGI -->
+    <!-- NOVO: DICIONÁRIO DE VARIÁVEIS & BUSCADOR DE EXPRESSÕES TARGET GROUP INDEX -->
     <section class="glass-card rounded-2xl p-6 border border-slate-800 space-y-6" id="sectionDictionary">
       <!-- Section Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-800">
@@ -595,7 +603,7 @@
           </div>
           <div>
             <div class="flex items-center space-x-2">
-              <h2 class="text-base font-bold text-white tracking-tight">Dicionário de Variáveis & Expressões TGI</h2>
+              <h2 class="text-base font-bold text-white tracking-tight">Dicionário de Variáveis & Expressões Target Group Index</h2>
               <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-orange-500/20 text-orange-400 border border-orange-500/30">Dicionário Oficial</span>
             </div>
             <p class="text-xs text-slate-400 mt-0.5">
@@ -652,7 +660,7 @@
         <!-- Tree Nodes Container -->
         <div id="treeLoadingIndicator" class="hidden p-8 text-center text-xs text-slate-400 bg-slate-900/60 rounded-xl border border-slate-800">
           <div class="animate-spin inline-block w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full mb-2"></div>
-          <p>Consultando dicionário hierárquico na TGI API...</p>
+          <p>Consultando dicionário hierárquico na Target Group Index API...</p>
         </div>
 
         <div id="treeNodesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -706,9 +714,9 @@
   <footer class="border-t border-slate-800 bg-slate-950/80 py-6 mt-12 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div class="flex items-center space-x-2">
-        <span>TGI Cloud Services &bull; Kantar / IBOPE</span>
+        <span>Target Group Index Cloud Services &bull; Kantar / IBOPE</span>
         <span>&bull;</span>
-        <span class="text-slate-400" id="footerCompanyLabel">Company Master _TGI_Latina & LAT_Trial_Teste</span>
+        <span class="text-slate-400" id="footerCompanyLabel">Company Master Latina (Target Group Index) & LAT_Trial_Teste</span>
       </div>
       <div>
         <span>Dashboard estático de conferência &bull; Publicado via <strong class="text-slate-400">here.now</strong></span>
@@ -739,18 +747,18 @@
         <div>
           <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Configurar Credenciais Para</label>
           <select id="modalBaseSelect" onchange="syncModalCredentialsWithBase(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-orange-500">
-            <option value="treinamento2_p">Base 1: BASE TRIAL BRASIL (_TGI_Latina)</option>
+            <option value="treinamento2_p">Base 1: BASE TRIAL BRASIL (Master Latina - Target Group Index)</option>
             <option value="2023r3_p">Base 2: TG BR 2023 R3 (LAT_Trial_Teste)</option>
           </select>
           <div id="modalBaseHint" class="mt-2 p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400">
-            Ambiente Master (<span class="font-mono text-orange-400">_TGI_Latina</span>) &bull; Usuário: <span class="text-slate-300">eduardo.fonseca@ibope.com</span>
+            Ambiente Master (<span class="font-mono text-orange-400">Master Latina - Target Group Index</span>) &bull; Usuário: <span class="text-slate-300">eduardo.fonseca@ibope.com</span>
           </div>
         </div>
 
         <!-- API Key Input -->
         <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">API Key (TGI Cloud Services)</label>
-          <input type="password" id="modalApiKey" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-orange-500" placeholder="Cole sua API Key da TGI">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">API Key (Target Group Index Cloud Services)</label>
+          <input type="password" id="modalApiKey" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-orange-500" placeholder="Cole sua API Key do Target Group Index">
           <p class="text-[11px] text-slate-400 mt-1">A chave é gravada estritamente no <code class="text-orange-400 font-mono">localStorage</code> do seu navegador.</p>
         </div>
 
@@ -760,8 +768,8 @@
           <div class="space-y-2">
             <select id="modalUserIdPreset" onchange="handlePresetUserChange(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-orange-500">
               <option value="trial@apikmr.com">trial@apikmr.com (LAT_Trial_Teste)</option>
-              <option value="eduardo.fonseca@ibope.com">eduardo.fonseca@ibope.com (_TGI_Latina)</option>
-              <option value="antonio@ibope.com">antonio@ibope.com (_TGI_Latina)</option>
+              <option value="eduardo.fonseca@ibope.com">eduardo.fonseca@ibope.com (Master Latina - Target Group Index)</option>
+              <option value="antonio@ibope.com">antonio@ibope.com (Master Latina - Target Group Index)</option>
               <option value="custom">Outro usuário...</option>
             </select>
             <input type="text" id="modalUserIdCustom" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-orange-500 hidden" placeholder="Digite o email cadastrado">
@@ -882,8 +890,8 @@
         techName: 'capacitabr2023r4__pw_cl',
         title: 'BASE TRIAL BRASIL',
         navSubtitle: 'BASE TRIAL BRASIL • Panorama de Informações',
-        accsClient: '_TGI_Latina',
-        bannerTitle: 'Ambiente Master Liberado • Company ACCS: <span class="font-mono text-orange-400">_TGI_Latina</span>',
+        accsClient: 'Master Latina (Target Group Index)',
+        bannerTitle: 'Ambiente Master Liberado • Company ACCS: <span class="font-mono text-orange-400">Master Latina (Target Group Index)</span>',
         bannerDesc: 'Acesso master configurado para América Latina com expiração em <span class="text-slate-200 font-semibold">2050</span>. Usuários autorizados: <span class="text-slate-300">eduardo.fonseca@ibope.com</span> e <span class="text-slate-300">antonio@ibope.com</span>.',
         defaultUser: 'eduardo.fonseca@ibope.com',
         lastPublished: '23-07-2026',
@@ -1072,7 +1080,7 @@
       document.getElementById('btnQuickMusicTotal').innerText = m.btnLabel;
 
       // Setores
-      document.getElementById('sectorSectionTitle').innerText = `Mapa Setorial da Pesquisa (${base.sectors.length} Categorias TGI Brasil)`;
+      document.getElementById('sectorSectionTitle').innerText = `Mapa Setorial da Pesquisa (${base.sectors.length} Categorias Target Group Index Brasil)`;
       document.getElementById('sectorCountBadge').innerHTML = `Nível Root &bull; Total: ${base.sectors.length} Setores`;
       renderSectorsGrid(base.sectors);
 
@@ -1286,10 +1294,10 @@
         if (res.ok) {
           const json = await res.json();
 
-          // A API TGI retorna HTTP 200 mesmo em falhas de autorização (ex: code 401.01)
+          // A API Target Group Index retorna HTTP 200 mesmo em falhas de autorização (ex: code 401.01)
           if (json.code && String(json.code) !== '200') {
             const errCode = String(json.code);
-            const errStatus = json.status || 'Erro retornado pela API TGI';
+            const errStatus = json.status || 'Erro retornado pela API Target Group Index';
             let detail = `${errCode}: ${errStatus}`;
             if (errCode === '401.01') {
               detail = `Autenticação Falhou (401.01). O usuário "${userId}" ou a API Key informada não tem permissão para a base "${base.title}" (${base.accsClient}). Cada base requer sua própria chave autorizada. Clique em "Credenciais" para configurar.`;
@@ -1394,7 +1402,7 @@
         if (baseKey === '2023r3_p') {
           hintEl.innerHTML = `Ambiente Homologação / Trial (<span class="font-mono text-orange-400">LAT_Trial_Teste</span>) &bull; Usuário: <span class="text-slate-300">trial@apikmr.com</span>`;
         } else {
-          hintEl.innerHTML = `Ambiente Master (<span class="font-mono text-orange-400">_TGI_Latina</span>) &bull; Usuário: <span class="text-slate-300">eduardo.fonseca@ibope.com</span>`;
+          hintEl.innerHTML = `Ambiente Master (<span class="font-mono text-orange-400">Master Latina - Target Group Index</span>) &bull; Usuário: <span class="text-slate-300">eduardo.fonseca@ibope.com</span>`;
         }
       }
 
@@ -1661,7 +1669,7 @@
     }
 
     // ==========================================
-    // NAVEGADOR EM ÁRVORE DA API TGI
+    // NAVEGADOR EM ÁRVORE DA API TARGET GROUP INDEX
     // ==========================================
 
     async function navigateTreeLevel(levelId, label, isReset = false) {
@@ -1768,7 +1776,7 @@
         }
       } catch (err) {
         loading.classList.add('hidden');
-        grid.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-rose-400">Falha de conexão com a API TGI.</div>`;
+        grid.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-rose-400">Falha de conexão com a API Target Group Index.</div>`;
       }
     }
 

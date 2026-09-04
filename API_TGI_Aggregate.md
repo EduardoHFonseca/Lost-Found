@@ -110,8 +110,8 @@ Módulo analítico e integrador para consumo dos serviços da **TGI Cloud Servic
 
 - **Hospedagem Estática:** Publicado no **here.now**.
 - **URLs Ativas:**
-  - Versão Atual (Multi-Base + Tratamento de Erro 401): [https://spruce-riddle-dwmd.here.now/](https://spruce-riddle-dwmd.here.now/)
-  - Versões Anteriores: [https://supple-tassel-q97y.here.now/](https://supple-tassel-q97y.here.now/) | [https://plush-bloom-5dp2.here.now/](https://plush-bloom-5dp2.here.now/) | [https://ancient-lagoon-j6mn.here.now/](https://ancient-lagoon-j6mn.here.now/)
+  - Versão Atual (Target Group Index / Sem Sigla TGI / Open Graph Tags): [https://indigo-raven-42ar.here.now/](https://indigo-raven-42ar.here.now/)
+  - Versões Anteriores: [https://spruce-riddle-dwmd.here.now/](https://spruce-riddle-dwmd.here.now/) | [https://supple-tassel-q97y.here.now/](https://supple-tassel-q97y.here.now/) | [https://plush-bloom-5dp2.here.now/](https://plush-bloom-5dp2.here.now/)
 - **Código Fonte do Dashboard:** Localizado em `api-tgi-aggregate/index.html`.
 - **Recursos do Dashboard:**
   - Seletor rápido de base ativa no topo (`BASE TRIAL BRASIL` vs `TG BR 2023 R3`).
@@ -142,7 +142,8 @@ Módulo analítico e integrador para consumo dos serviços da **TGI Cloud Servic
 - [x] **Tratamento Avançado de Erros:** Interceptação do código de erro interno `401.01` da TGI API (retornado sob HTTP 200) com mensagens diagnósticas precisas por base e usuário.
 - [x] **Dicionário e Árvore Integrados:** 30+ variáveis catalogadas com 1 clique (`Usar` e `+ AND`) e navegador hierárquico oficial `/dictionary` e `/question`.
 - [x] **Carregamento Multi-Credenciais:** Suporte a ingestão simultânea de chaves de ambas as bases via parâmetros de URL (`apikey_base1` e `apikey_base2`).
-- [x] **Publicação Atualizada:** Deploy ativo em [https://spruce-riddle-dwmd.here.now/](https://spruce-riddle-dwmd.here.now/).
+- [x] **Adequação de Nomenclatura (Target Group Index):** Remoção total da sigla "TGI" de todas as áreas visíveis ao cliente externo (título da página, Open Graph tags para thumbnail, navbar, banners, metadados, cards e rodapé).
+- [x] **Publicação Atualizada:** Deploy ativo em [https://indigo-raven-42ar.here.now/](https://indigo-raven-42ar.here.now/).
 
 ### Próximos Passos:
 - [ ] **Validação de Segurança:** Executar varredura automatizada contra vazamento de credenciais antes de qualquer publicação em ambiente produtivo.
