@@ -137,6 +137,14 @@ Módulo analítico e integrador para consumo dos serviços da **TGI Cloud Servic
 
 ## 8. Backlog do Projeto (Próximas Fases)
 
+### Entregas Realizadas (04-Set-2026):
+- [x] **Suporte Multi-Base Homologado:** Operação validada em tempo real para Base 1 (`treinamento2_p` / `_TGI_Latina`) e Base 2 (`2023r3_p` / `LAT_Trial_Teste`).
+- [x] **Tratamento Avançado de Erros:** Interceptação do código de erro interno `401.01` da TGI API (retornado sob HTTP 200) com mensagens diagnósticas precisas por base e usuário.
+- [x] **Dicionário e Árvore Integrados:** 30+ variáveis catalogadas com 1 clique (`Usar` e `+ AND`) e navegador hierárquico oficial `/dictionary` e `/question`.
+- [x] **Carregamento Multi-Credenciais:** Suporte a ingestão simultânea de chaves de ambas as bases via parâmetros de URL (`apikey_base1` e `apikey_base2`).
+- [x] **Publicação Atualizada:** Deploy ativo em [https://spruce-riddle-dwmd.here.now/](https://spruce-riddle-dwmd.here.now/).
+
+### Próximos Passos:
 - [ ] **Validação de Segurança:** Executar varredura automatizada contra vazamento de credenciais antes de qualquer publicação em ambiente produtivo.
 - [ ] **Módulo Backend em Python:** Criar cliente wrapper (`services/tgi_client.py`) para chamadas server-side com cálculo de hash SHA-1 (`sha1(ts + privatekey + publickey)`).
 - [ ] **Motor de Tabulação Cruzada (Crosstab):** Integrar chamadas avançadas para matrizes de linhas e colunas (crosstabs de até 800x800).
