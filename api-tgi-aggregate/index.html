@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TGI Analytics Dashboard | BASE TRIAL BRASIL</title>
+  <title>TGI Analytics Dashboard | BASE TRIAL BRASIL & TG BR 2023 R3</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -55,8 +55,8 @@
   <!-- Top Navbar -->
   <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-4">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-600/20">
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-600/20 shrink-0">
           <i data-lucide="bar-chart-3" class="w-5 h-5 text-white"></i>
         </div>
         <div>
@@ -64,13 +64,25 @@
             <h1 class="text-base font-bold text-white tracking-tight">TGI Latina Services</h1>
             <span class="text-[10px] uppercase font-semibold tracking-wider bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded border border-orange-500/30">API v3</span>
           </div>
-          <p class="text-xs text-slate-400">BASE TRIAL BRASIL &bull; Panorama de Informações</p>
+          <p class="text-xs text-slate-400" id="navSubtitle">Multi-Base &bull; Panorama de Informações</p>
         </div>
       </div>
 
-      <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <!-- Base Selector -->
+        <div class="flex items-center space-x-2 bg-slate-800/90 border border-slate-700/80 rounded-xl px-2.5 py-1.5 shadow-sm">
+          <i data-lucide="layers" class="w-4 h-4 text-orange-400 shrink-0"></i>
+          <div class="flex flex-col">
+            <span class="text-[9px] uppercase font-bold text-slate-400 leading-none">Base Ativa</span>
+            <select id="selectActiveBase" onchange="switchBase(this.value)" class="bg-transparent text-xs font-semibold text-white focus:outline-none cursor-pointer pr-1">
+              <option value="treinamento2_p" class="bg-slate-900 text-white">Base 1: BASE TRIAL BRASIL (treinamento2_p)</option>
+              <option value="2023r3_p" class="bg-slate-900 text-white">Base 2: TG BR 2023 R3 (2023r3_p)</option>
+            </select>
+          </div>
+        </div>
+
         <!-- Status Indicator -->
-        <div id="connectionStatusBadge" class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 badge-glow">
+        <div id="connectionStatusBadge" class="hidden lg:flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 badge-glow">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>API Conectada</span>
         </div>
@@ -84,7 +96,7 @@
         <!-- Credentials Config Button -->
         <button onclick="openAuthModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition shadow-sm">
           <i data-lucide="key" class="w-3.5 h-3.5 text-orange-400"></i>
-          <span>Credenciais</span>
+          <span class="hidden sm:inline">Credenciais</span>
         </button>
       </div>
     </div>
@@ -96,13 +108,13 @@
     <!-- Alert / Notice Banner -->
     <div class="bg-gradient-to-r from-orange-950/40 via-slate-900/60 to-slate-900/40 border border-orange-500/20 rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm">
       <div class="flex items-start space-x-3.5">
-        <div class="p-2 bg-orange-500/10 text-orange-400 rounded-xl mt-0.5">
+        <div class="p-2 bg-orange-500/10 text-orange-400 rounded-xl mt-0.5 shrink-0">
           <i data-lucide="shield-check" class="w-5 h-5"></i>
         </div>
         <div>
-          <h2 class="text-sm font-semibold text-white">Ambiente Master Liberado &bull; Company ACCS: <span class="font-mono text-orange-400">_TGI_Latina</span></h2>
-          <p class="text-xs text-slate-400 mt-0.5">
-            Acesso master configurado para América Latina com expiração em <span class="text-slate-200 font-semibold">2050</span>. Usuários autorizados: <span class="text-slate-300">eduardo.fonseca@ibope.com</span> e <span class="text-slate-300">antonio@ibope.com</span>.
+          <h2 class="text-sm font-semibold text-white" id="bannerClientTitle">Ambiente Master Liberado &bull; Company ACCS: <span class="font-mono text-orange-400">_TGI_Latina</span></h2>
+          <p class="text-xs text-slate-400 mt-0.5" id="bannerClientDesc">
+            Acesso master configurado para América Latina com expiração em <span class="text-slate-200 font-semibold">2050</span>. Usuários autorizados: <span class="text-slate-300">eduardo.fonseca@ibope.com</span>, <span class="text-slate-300">antonio@ibope.com</span> e <span class="text-slate-300">trial@apikmr.com</span>.
           </p>
         </div>
       </div>
@@ -125,10 +137,15 @@
           <h2 class="text-lg font-bold text-white tracking-tight">Metadados & Parâmetros da Base</h2>
           <p class="text-xs text-slate-400">Identificadores técnicos para chamadas na TGI Cloud Services API</p>
         </div>
-        <button onclick="loadSurveyInfo()" class="text-xs text-slate-400 hover:text-orange-400 flex items-center space-x-1 transition">
-          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-          <span>Atualizar</span>
-        </button>
+        <div class="flex items-center space-x-2">
+          <span id="badgeActiveBaseIndicator" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-500/20 text-orange-400 border border-orange-500/30 font-mono">
+            treinamento2_p
+          </span>
+          <button onclick="loadSurveyInfo()" class="text-xs text-slate-400 hover:text-orange-400 flex items-center space-x-1 transition p-1">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Atualizar</span>
+          </button>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -140,8 +157,8 @@
               <i data-lucide="database" class="w-4 h-4"></i>
             </div>
           </div>
-          <div class="text-lg font-bold text-white" id="metaSurveyTitle">BASE TRIAL BRASIL</div>
-          <div class="text-xs font-mono text-slate-400 mt-1" id="metaSurveyName">capacitabr2023r4__pw_cl</div>
+          <div class="text-lg font-bold text-white truncate" id="metaSurveyTitle">BASE TRIAL BRASIL</div>
+          <div class="text-xs font-mono text-slate-400 mt-1 truncate" id="metaSurveyName">capacitabr2023r4__pw_cl</div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
             <span>Última Publicação:</span>
             <span class="font-medium text-slate-200" id="metaLastPublished">23-07-2026</span>
@@ -173,10 +190,10 @@
             </div>
           </div>
           <div class="text-sm font-bold text-white font-mono" id="metaSurveyFamily">bratgiptb</div>
-          <div class="text-xs font-mono text-purple-400 mt-1" id="metaWaveName">wave: treinamento2_p</div>
+          <div class="text-xs font-mono text-purple-400 mt-1 truncate" id="metaWaveName">wave: treinamento2_p</div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
-            <span>Copyright:</span>
-            <span class="font-medium text-slate-200 truncate ml-2">TGI LATINA &bull; Kantar</span>
+            <span>ACCS Client:</span>
+            <span class="font-medium text-slate-200 truncate ml-2" id="metaAccsClient">_TGI_Latina</span>
           </div>
         </div>
 
@@ -196,7 +213,7 @@
           <div class="text-xs text-slate-400 mt-2">Padrão ISO 639 (ptb default)</div>
           <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
             <span>Validade da Chave:</span>
-            <span class="font-semibold text-emerald-400">Ano 2050 (Ativo)</span>
+            <span class="font-semibold text-emerald-400" id="metaKeyValidity">Ano 2050 (Ativo)</span>
           </div>
         </div>
       </div>
@@ -209,7 +226,7 @@
       <!-- Card Header com toggle -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-800 relative z-10">
         <div class="flex items-start space-x-3.5">
-          <div class="p-3 bg-gradient-to-tr from-orange-600 to-amber-500 text-white rounded-xl shadow-lg shadow-orange-600/30">
+          <div class="p-3 bg-gradient-to-tr from-orange-600 to-amber-500 text-white rounded-xl shadow-lg shadow-orange-600/30 shrink-0">
             <i data-lucide="play-circle" class="w-6 h-6"></i>
           </div>
           <div>
@@ -218,7 +235,7 @@
               <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Card Aberto</span>
             </div>
             <p class="text-xs text-slate-300 mt-0.5">
-              Dados oficiais computados diretamente via API TGI para Vídeo Streaming (Netflix, Prime Video, etc.) e Streaming de Música (Spotify, etc.).
+              Dados oficiais computados diretamente via API TGI para Vídeo Streaming (Netflix, Prime Video, etc.) e Streaming de Música (Spotify, etc.) na base selecionada.
             </p>
           </div>
         </div>
@@ -250,8 +267,8 @@
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-sm font-bold font-mono text-white">50.093,05 mil</div>
-                <div class="text-[10px] text-slate-400">Penetração: <span class="text-indigo-400 font-semibold">54,68%</span> da pop.</div>
+                <div class="text-sm font-bold font-mono text-white" id="streamVideoPop">50.093,05 mil</div>
+                <div class="text-[10px] text-slate-400">Penetração: <span class="text-indigo-400 font-semibold" id="streamVideoPenetration">54,68%</span> da pop.</div>
               </div>
             </div>
 
@@ -259,15 +276,15 @@
             <div class="mt-4 space-y-3">
               <div class="text-xs font-semibold text-slate-300 flex items-center justify-between">
                 <span>Distribuição por Sexo:</span>
-                <span class="text-[11px] font-mono text-slate-400">Amostra: 13.918 respondentes</span>
+                <span class="text-[11px] font-mono text-slate-400" id="streamVideoSample">Amostra: 13.918 respondentes</span>
               </div>
 
               <!-- Barra de Distribuição Visual -->
               <div class="h-4 w-full bg-slate-800 rounded-full overflow-hidden flex shadow-inner">
-                <div class="bg-gradient-to-r from-blue-600 to-cyan-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 47.69%">
+                <div id="streamVideoMenBar" class="bg-gradient-to-r from-blue-600 to-cyan-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 47.69%">
                   47,7%
                 </div>
-                <div class="bg-gradient-to-r from-fuchsia-600 to-pink-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 52.31%">
+                <div id="streamVideoWomenBar" class="bg-gradient-to-r from-fuchsia-600 to-pink-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 52.31%">
                   52,3%
                 </div>
               </div>
@@ -281,10 +298,10 @@
                       <i data-lucide="user" class="w-3 h-3"></i>
                       <span>Homens</span>
                     </span>
-                    <span class="text-base font-black font-mono text-white">47,7%</span>
+                    <span class="text-base font-black font-mono text-white" id="streamVideoMenPct">47,7%</span>
                   </div>
-                  <div class="text-[11px] font-mono text-slate-300 mt-1">23.891,37 mil</div>
-                  <div class="text-[10px] text-slate-500 mt-0.5">Amostra: 6.579 casos</div>
+                  <div class="text-[11px] font-mono text-slate-300 mt-1" id="streamVideoMenPop">23.891,37 mil</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5" id="streamVideoMenSample">Amostra: 6.579 casos</div>
                   <button onclick="setExpression('14W157052183 AND MDPDSXMS', 'Vídeo Pago - Homens')" class="mt-2 text-[10px] text-blue-400 hover:text-blue-300 hover:underline flex items-center space-x-1">
                     <i data-lucide="corner-down-right" class="w-2.5 h-2.5"></i>
                     <span>Consultar no Painel</span>
@@ -298,10 +315,10 @@
                       <i data-lucide="user" class="w-3 h-3"></i>
                       <span>Mulheres</span>
                     </span>
-                    <span class="text-base font-black font-mono text-white">52,3%</span>
+                    <span class="text-base font-black font-mono text-white" id="streamVideoWomenPct">52,3%</span>
                   </div>
-                  <div class="text-[11px] font-mono text-slate-300 mt-1">26.201,68 mil</div>
-                  <div class="text-[10px] text-slate-500 mt-0.5">Amostra: 7.339 casos</div>
+                  <div class="text-[11px] font-mono text-slate-300 mt-1" id="streamVideoWomenPop">26.201,68 mil</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5" id="streamVideoWomenSample">Amostra: 7.339 casos</div>
                   <button onclick="setExpression('14W157052183 AND MDPDSXFM', 'Vídeo Pago - Mulheres')" class="mt-2 text-[10px] text-pink-400 hover:text-pink-300 hover:underline flex items-center space-x-1">
                     <i data-lucide="corner-down-right" class="w-2.5 h-2.5"></i>
                     <span>Consultar no Painel</span>
@@ -314,12 +331,12 @@
                 <div class="flex items-center space-x-2">
                   <span class="w-2 h-2 rounded-full bg-red-500"></span>
                   <span class="font-semibold text-white">Netflix (U30d):</span>
-                  <span class="text-slate-400 font-mono">41.298,81 mil</span>
+                  <span class="text-slate-400 font-mono" id="streamNetflixPop">41.298,81 mil</span>
                 </div>
                 <div class="flex items-center space-x-2 font-mono text-[11px]">
-                  <span class="text-blue-400 font-semibold">♂ 46,6%</span>
+                  <span class="text-blue-400 font-semibold" id="streamNetflixMen">♂ 46,6%</span>
                   <span class="text-slate-600">&bull;</span>
-                  <span class="text-pink-400 font-semibold">♀ 53,4%</span>
+                  <span class="text-pink-400 font-semibold" id="streamNetflixWomen">♀ 53,4%</span>
                 </div>
               </div>
             </div>
@@ -338,8 +355,8 @@
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-sm font-bold font-mono text-white">47.030,41 mil</div>
-                <div class="text-[10px] text-slate-400">Penetração: <span class="text-emerald-400 font-semibold">51,33%</span> da pop.</div>
+                <div class="text-sm font-bold font-mono text-white" id="streamMusicPop">47.030,41 mil</div>
+                <div class="text-[10px] text-slate-400">Penetração: <span class="text-emerald-400 font-semibold" id="streamMusicPenetration">51,33%</span> da pop.</div>
               </div>
             </div>
 
@@ -347,15 +364,15 @@
             <div class="mt-4 space-y-3">
               <div class="text-xs font-semibold text-slate-300 flex items-center justify-between">
                 <span>Distribuição por Sexo:</span>
-                <span class="text-[11px] font-mono text-slate-400">Amostra: 12.873 respondentes</span>
+                <span class="text-[11px] font-mono text-slate-400" id="streamMusicSample">Amostra: 12.873 respondentes</span>
               </div>
 
               <!-- Barra de Distribuição Visual -->
               <div class="h-4 w-full bg-slate-800 rounded-full overflow-hidden flex shadow-inner">
-                <div class="bg-gradient-to-r from-blue-600 to-cyan-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 49.21%">
+                <div id="streamMusicMenBar" class="bg-gradient-to-r from-blue-600 to-cyan-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 49.21%">
                   49,2%
                 </div>
-                <div class="bg-gradient-to-r from-fuchsia-600 to-pink-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 50.79%">
+                <div id="streamMusicWomenBar" class="bg-gradient-to-r from-fuchsia-600 to-pink-500 text-[10px] font-bold text-white flex items-center justify-center transition-all duration-500" style="width: 50.79%">
                   50,8%
                 </div>
               </div>
@@ -369,10 +386,10 @@
                       <i data-lucide="user" class="w-3 h-3"></i>
                       <span>Homens</span>
                     </span>
-                    <span class="text-base font-black font-mono text-white">49,2%</span>
+                    <span class="text-base font-black font-mono text-white" id="streamMusicMenPct">49,2%</span>
                   </div>
-                  <div class="text-[11px] font-mono text-slate-300 mt-1">23.143,47 mil</div>
-                  <div class="text-[10px] text-slate-500 mt-0.5">Amostra: 6.281 casos</div>
+                  <div class="text-[11px] font-mono text-slate-300 mt-1" id="streamMusicMenPop">23.143,47 mil</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5" id="streamMusicMenSample">Amostra: 6.281 casos</div>
                   <button onclick="setExpression('B221542445 AND MDPDSXMS', 'Música - Homens')" class="mt-2 text-[10px] text-blue-400 hover:text-blue-300 hover:underline flex items-center space-x-1">
                     <i data-lucide="corner-down-right" class="w-2.5 h-2.5"></i>
                     <span>Consultar no Painel</span>
@@ -386,10 +403,10 @@
                       <i data-lucide="user" class="w-3 h-3"></i>
                       <span>Mulheres</span>
                     </span>
-                    <span class="text-base font-black font-mono text-white">50,8%</span>
+                    <span class="text-base font-black font-mono text-white" id="streamMusicWomenPct">50,8%</span>
                   </div>
-                  <div class="text-[11px] font-mono text-slate-300 mt-1">23.886,94 mil</div>
-                  <div class="text-[10px] text-slate-500 mt-0.5">Amostra: 6.592 casos</div>
+                  <div class="text-[11px] font-mono text-slate-300 mt-1" id="streamMusicWomenPop">23.886,94 mil</div>
+                  <div class="text-[10px] text-slate-500 mt-0.5" id="streamMusicWomenSample">Amostra: 6.592 casos</div>
                   <button onclick="setExpression('B221542445 AND MDPDSXFM', 'Música - Mulheres')" class="mt-2 text-[10px] text-pink-400 hover:text-pink-300 hover:underline flex items-center space-x-1">
                     <i data-lucide="corner-down-right" class="w-2.5 h-2.5"></i>
                     <span>Consultar no Painel</span>
@@ -402,12 +419,12 @@
                 <div class="flex items-center space-x-2">
                   <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                   <span class="font-semibold text-white">Spotify (U30d):</span>
-                  <span class="text-slate-400 font-mono">28.209,49 mil</span>
+                  <span class="text-slate-400 font-mono" id="streamSpotifyPop">28.209,49 mil</span>
                 </div>
                 <div class="flex items-center space-x-2 font-mono text-[11px]">
-                  <span class="text-blue-400 font-semibold">♂ 48,9%</span>
+                  <span class="text-blue-400 font-semibold" id="streamSpotifyMen">♂ 48,9%</span>
                   <span class="text-slate-600">&bull;</span>
-                  <span class="text-pink-400 font-semibold">♀ 51,1%</span>
+                  <span class="text-pink-400 font-semibold" id="streamSpotifyWomen">♀ 51,1%</span>
                 </div>
               </div>
             </div>
@@ -418,18 +435,18 @@
         <!-- Síntese de Comparação Rápida -->
         <div class="bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
           <div class="flex items-center space-x-2.5">
-            <span class="p-1.5 bg-orange-500/10 text-orange-400 rounded-lg">
+            <span class="p-1.5 bg-orange-500/10 text-orange-400 rounded-lg shrink-0">
               <i data-lucide="info" class="w-4 h-4"></i>
             </span>
-            <span class="text-slate-300">
+            <span class="text-slate-300" id="streamQuickRefPop">
               População total de referência: <strong>91.616,00 mil</strong> indivíduos no Brasil (Homens: <strong>48,11%</strong> | Mulheres: <strong>51,89%</strong>).
             </span>
           </div>
-          <div class="flex items-center space-x-2">
-            <button onclick="setExpression('14W157052183', 'Total Vídeo Streaming Pago')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-mono text-[11px]">
+          <div class="flex items-center space-x-2 shrink-0">
+            <button id="btnQuickVideoTotal" onclick="setExpression('14W157052183', 'Total Vídeo Streaming Pago')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-mono text-[11px]">
               Vídeo Total (54,68%)
             </button>
-            <button onclick="setExpression('B221542445', 'Total Streaming Música')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-mono text-[11px]">
+            <button id="btnQuickMusicTotal" onclick="setExpression('B221542445', 'Total Streaming Música')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 font-mono text-[11px]">
               Música Total (51,33%)
             </button>
           </div>
@@ -449,7 +466,7 @@
             <h2 class="text-base font-bold text-white">Consulta Rápida de Expressão & Métricas Oficiais</h2>
           </div>
           <p class="text-xs text-slate-400 mt-1">
-            Consulte diretamente o endpoint <code class="font-mono text-orange-400 bg-slate-900 px-1.5 py-0.5 rounded text-[11px]">POST /report/expression</code> para obter projeções e amostras instantâneas
+            Consulte diretamente o endpoint <code class="font-mono text-orange-400 bg-slate-900 px-1.5 py-0.5 rounded text-[11px]">POST /report/expression</code> na base ativa para obter projeções e amostras instantâneas
           </p>
         </div>
 
@@ -469,12 +486,32 @@
           <div>
             <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Código da Expressão TGI</label>
             <div class="relative">
-              <input type="text" id="inputExpression" value="MDPDECCA" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500" placeholder="Ex: MDPDECCA ou DBSEXLME">
+              <input type="text" id="inputExpression" value="MDPDECCA" onkeydown="if(event.key === 'Enter') executeExpression()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500" placeholder="Ex: MDPDECCA ou DBSEXLME">
               <span id="exprLabelHelper" class="absolute right-3 top-2.5 text-xs text-slate-400">Casado(a)</span>
             </div>
             <p class="text-[11px] text-slate-400 mt-1.5">
-              Suporta operadores lógicos padrão TGI: <code class="text-orange-400 font-mono">AND</code>, <code class="text-orange-400 font-mono">OR</code>, <code class="text-orange-400 font-mono">NOT</code>.
+              Suporta operadores lógicos padrão TGI: <code class="text-orange-400 font-mono">AND</code>, <code class="text-orange-400 font-mono">OR</code>, <code class="text-orange-400 font-mono">NOT</code>. Pressione <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] text-slate-300">Enter</kbd> para consultar.
             </p>
+          </div>
+
+          <!-- Alerta de Chave Ausente -->
+          <div id="missingKeyAlert" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-300 flex items-start space-x-2.5">
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+            <div class="flex-1">
+              <div class="font-semibold text-white">Chave de API necessária</div>
+              <p class="text-slate-300 text-[11px] mt-0.5">A consulta em tempo real requer a API Key cadastrada para a base ativa.</p>
+              <button onclick="openAuthModal()" class="mt-2 text-[11px] font-semibold text-orange-400 hover:text-orange-300 underline flex items-center space-x-1">
+                <span>Informar Credenciais Agora</span> &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- Alerta de Erro de Execução -->
+          <div id="exprErrorBanner" class="hidden bg-rose-500/10 border border-rose-500/30 rounded-xl p-3 text-xs text-rose-300 flex items-start space-x-2.5">
+            <i data-lucide="x-circle" class="w-4 h-4 text-rose-400 shrink-0 mt-0.5"></i>
+            <div class="flex-1 text-[11px]" id="exprErrorText">
+              Erro na consulta da expressão.
+            </div>
           </div>
 
           <button id="btnRunExpression" onclick="executeExpression()" class="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-medium py-2.5 px-4 rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-lg shadow-orange-600/20">
@@ -484,45 +521,58 @@
         </div>
 
         <!-- Output Cards Grid -->
-        <div class="lg:col-span-7">
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div class="lg:col-span-7 space-y-3">
+          <!-- Cabeçalho do Resultado com Feedback em Tempo Real -->
+          <div class="flex items-center justify-between pb-1">
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Resultado da Consulta API</span>
+              <span id="resBadgeStatus" class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                ✓ Conectado
+              </span>
+            </div>
+            <div class="text-[11px] font-mono text-slate-400 truncate max-w-[260px]" id="resCurrentExprName">
+              expr: <span class="text-orange-400 font-semibold">MDPDECCA</span>
+            </div>
+          </div>
+
+          <div id="cardsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-3 p-1 rounded-2xl transition-all duration-300">
             <!-- (000) Projeção -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 card-metric">
               <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Projeção (000)</div>
               <div class="text-xl font-bold font-mono text-amber-400 mt-1" id="resPopProjection">25.324,71</div>
               <div class="text-[10px] text-slate-500 mt-1">Milhares de indivíduos</div>
             </div>
 
             <!-- Sample -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 card-metric">
               <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Amostra (Sample)</div>
               <div class="text-xl font-bold font-mono text-emerald-400 mt-1" id="resSample">7.173</div>
-              <div class="text-[10px] text-slate-500 mt-1">Respondentes na pesquisa</div>
+              <div class="text-[10px] text-slate-500 mt-1">Respondentes no survey</div>
             </div>
 
             <!-- Horizontal % -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 card-metric">
               <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Horizontal %</div>
               <div class="text-xl font-bold font-mono text-cyan-400 mt-1" id="resHorzPercent">27,64%</div>
               <div class="text-[10px] text-slate-500 mt-1">Penetração na base</div>
             </div>
 
             <!-- Vertical % -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 card-metric">
               <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Vertical %</div>
               <div class="text-xl font-bold font-mono text-purple-400 mt-1" id="resVertPercent">100,00%</div>
               <div class="text-[10px] text-slate-500 mt-1">Composição do filtro</div>
             </div>
 
             <!-- Index -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 card-metric">
               <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Índice (Index)</div>
               <div class="text-xl font-bold font-mono text-orange-400 mt-1" id="resIndex">100</div>
               <div class="text-[10px] text-slate-500 mt-1">Base 100 = média</div>
             </div>
 
             <!-- Status de Resposta -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between card-metric">
               <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Resposta API</div>
               <div class="flex items-center space-x-1.5 text-xs text-emerald-400 font-mono mt-1" id="resStatusCode">
                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -535,21 +585,118 @@
       </div>
     </section>
 
-    <!-- Mapa Geral de Setores e Dicionário (38 Categorias Principais) -->
+    <!-- NOVO: DICIONÁRIO DE VARIÁVEIS & BUSCADOR DE EXPRESSÕES TGI -->
+    <section class="glass-card rounded-2xl p-6 border border-slate-800 space-y-6" id="sectionDictionary">
+      <!-- Section Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+        <div class="flex items-start space-x-3.5">
+          <div class="p-2.5 bg-orange-500/10 text-orange-400 rounded-xl mt-0.5 shrink-0">
+            <i data-lucide="book-marked" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h2 class="text-base font-bold text-white tracking-tight">Dicionário de Variáveis & Expressões TGI</h2>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-orange-500/20 text-orange-400 border border-orange-500/30">Dicionário Oficial</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Consulte os códigos oficiais das variáveis (ex: <code class="text-orange-400 font-mono">MDPDSXFM</code> para Mulheres, <code class="text-orange-400 font-mono">NSEBRA01</code> para Classe AB) e utilize-os diretamente no painel.
+            </p>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs for Dictionary -->
+        <div class="flex items-center p-1 bg-slate-900 border border-slate-800 rounded-xl text-xs shrink-0">
+          <button id="tabBtnCurated" onclick="switchDictTab('curated')" class="px-3 py-1.5 rounded-lg font-semibold bg-orange-600 text-white transition shadow-sm flex items-center space-x-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+            <span>Catálogo Rápido</span>
+          </button>
+          <button id="tabBtnTree" onclick="switchDictTab('tree')" class="px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition flex items-center space-x-1.5">
+            <i data-lucide="git-branch" class="w-3.5 h-3.5"></i>
+            <span>Árvore da API (Ao Vivo)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB 1: Catálogo Rápido com Busca e Categorias -->
+      <div id="dictTabCurated" class="space-y-4">
+        <!-- Search and Category Filters -->
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <!-- Search input -->
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 text-slate-500 absolute left-3.5 top-3"></i>
+            <input type="text" id="dictSearchInput" oninput="handleCuratedSearch(this.value)" placeholder="Buscar por termo ou keyword (ex: feminino, netflix, solteiro, são paulo, classe a)..." class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-orange-500">
+          </div>
+
+          <!-- Category Pill Buttons -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full text-[11px]" id="curatedCategoryPills">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Grid of Curated Variable Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" id="curatedVariablesGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- TAB 2: Navegador em Árvore via API Oficial -->
+      <div id="dictTabTree" class="hidden space-y-4">
+        <!-- Breadcrumbs Navigation -->
+        <div class="flex items-center space-x-2 bg-slate-900 border border-slate-800 px-4 py-2.5 rounded-xl text-xs overflow-x-auto" id="treeBreadcrumbs">
+          <span class="text-slate-500 shrink-0">Navegação da API:</span>
+          <div class="flex items-center space-x-1" id="treeBreadcrumbTrail">
+            <button onclick="navigateTreeLevel('root', 'Raiz (40 Setores)')" class="text-orange-400 font-semibold hover:underline">Raiz da Pesquisa</button>
+          </div>
+        </div>
+
+        <!-- Tree Nodes Container -->
+        <div id="treeLoadingIndicator" class="hidden p-8 text-center text-xs text-slate-400 bg-slate-900/60 rounded-xl border border-slate-800">
+          <div class="animate-spin inline-block w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full mb-2"></div>
+          <p>Consultando dicionário hierárquico na TGI API...</p>
+        </div>
+
+        <div id="treeNodesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <!-- Populated dynamically via API call -->
+        </div>
+
+        <!-- Question Answers Panel (When a leaf question node is opened) -->
+        <div id="treeQuestionDetail" class="hidden bg-slate-900 border border-slate-700/80 rounded-2xl p-5 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div>
+              <span class="text-[10px] uppercase font-bold text-orange-400 tracking-wider">Variável / Pergunta Selecionada</span>
+              <h3 class="text-sm font-bold text-white mt-0.5" id="treeQuestionLabel">Nome da Pergunta</h3>
+              <p class="text-xs text-slate-400 font-mono mt-0.5" id="treeQuestionKeyword">Keyword: ---</p>
+            </div>
+            <button onclick="closeTreeQuestionDetail()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <div class="space-y-2">
+            <div class="text-xs font-semibold text-slate-300">Respostas Disponíveis & Códigos de Expressão:</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="treeAnswersList">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mapa Geral de Setores e Dicionário -->
     <section class="space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h2 class="text-lg font-bold text-white tracking-tight">Mapa Setorial da Pesquisa (38 Categorias TGI Brasil)</h2>
-          <p class="text-xs text-slate-400">Estrutura de variáveis organizadas por pilares temáticos do estudo</p>
+          <h2 class="text-lg font-bold text-white tracking-tight" id="sectorSectionTitle">Mapa Setorial da Pesquisa</h2>
+          <p class="text-xs text-slate-400">Estrutura de variáveis organizadas por pilares temáticos do estudo ativo</p>
         </div>
-        <div class="text-xs text-slate-400 font-mono bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg">
+        <div class="text-xs text-slate-400 font-mono bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg" id="sectorCountBadge">
           Nível Root &bull; Total: 38 Setores
         </div>
       </div>
 
       <!-- Setores Categorizados em Abas / Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="categoriesGrid">
-        <!-- JS irá preencher as 38 categorias formatadas com badges -->
+        <!-- JS irá preencher as categorias formatadas com badges -->
       </div>
     </section>
 
@@ -561,7 +708,7 @@
       <div class="flex items-center space-x-2">
         <span>TGI Cloud Services &bull; Kantar / IBOPE</span>
         <span>&bull;</span>
-        <span class="text-slate-400">Company Master _TGI_Latina</span>
+        <span class="text-slate-400" id="footerCompanyLabel">Company Master _TGI_Latina & LAT_Trial_Teste</span>
       </div>
       <div>
         <span>Dashboard estático de conferência &bull; Publicado via <strong class="text-slate-400">here.now</strong></span>
@@ -579,7 +726,7 @@
           </div>
           <div>
             <h3 class="text-sm font-bold text-white">Configuração de Credenciais</h3>
-            <p class="text-xs text-slate-400">Armazenamento local restrito (OWASP / Client-Side)</p>
+            <p class="text-xs text-slate-400">Armazenamento local seguro (OWASP Top 10 / Client-Side)</p>
           </div>
         </div>
         <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-200">
@@ -588,6 +735,15 @@
       </div>
 
       <div class="mt-5 space-y-4">
+        <!-- Base Picker for Credentials -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Configurar Credenciais Para</label>
+          <select id="modalBaseSelect" onchange="syncModalCredentialsWithBase(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-orange-500">
+            <option value="treinamento2_p">Base 1: BASE TRIAL BRASIL (_TGI_Latina)</option>
+            <option value="2023r3_p">Base 2: TG BR 2023 R3 (LAT_Trial_Teste)</option>
+          </select>
+        </div>
+
         <!-- API Key Input -->
         <div>
           <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">API Key (TGI Cloud Services)</label>
@@ -595,20 +751,25 @@
           <p class="text-[11px] text-slate-400 mt-1">A chave é gravada estritamente no <code class="text-orange-400 font-mono">localStorage</code> do seu navegador.</p>
         </div>
 
-        <!-- User Selector -->
+        <!-- User Selector / Input -->
         <div>
           <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Usuário Autorizado</label>
-          <select id="modalUserId" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-orange-500">
-            <option value="eduardo.fonseca@ibope.com">eduardo.fonseca@ibope.com</option>
-            <option value="antonio@ibope.com">antonio@ibope.com</option>
-          </select>
+          <div class="space-y-2">
+            <select id="modalUserIdPreset" onchange="handlePresetUserChange(this.value)" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-orange-500">
+              <option value="trial@apikmr.com">trial@apikmr.com (LAT_Trial_Teste)</option>
+              <option value="eduardo.fonseca@ibope.com">eduardo.fonseca@ibope.com (_TGI_Latina)</option>
+              <option value="antonio@ibope.com">antonio@ibope.com (_TGI_Latina)</option>
+              <option value="custom">Outro usuário...</option>
+            </select>
+            <input type="text" id="modalUserIdCustom" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-orange-500 hidden" placeholder="Digite o email cadastrado">
+          </div>
         </div>
 
         <!-- Action Buttons -->
         <div class="pt-2 flex items-center space-x-3">
           <button onclick="saveAndTestCredentials()" class="flex-1 bg-orange-600 hover:bg-orange-500 text-white font-medium py-2.5 px-4 rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow-md shadow-orange-600/20">
             <i data-lucide="check" class="w-3.5 h-3.5"></i>
-            <span>Salvar & Testar Conexão</span>
+            <span>Salvar & Conectar</span>
           </button>
           <button onclick="clearCredentials()" class="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition border border-slate-700">
             Limpar
@@ -619,14 +780,12 @@
   </div>
 
   <script>
-    // Configurações e Estado
+    // Configurações e Dicionários das Bases
     const API_BASE = 'https://www.tgicloudservices.com/tgiapiv3/aggregate_api';
-    const SURVEY_FAMILY = 'bratgiptb';
-    const WAVE_NAME = 'treinamento2_p';
     const LANGUAGE = 'ptb';
 
-    // Setores pré-mapeados da BASE TRIAL BRASIL
-    const TGI_SECTORS = [
+    // Setores Base 1: BASE TRIAL BRASIL (treinamento2_p - 38 setores)
+    const TGI_SECTORS_TREINAMENTO = [
       { id: 430, label: 'DADOS DEMOGRÁFICOS', keyword: 'DEMOGRAP', section: 'Demografia', icon: 'users', color: 'blue' },
       { id: 2890, label: 'PERGUNTAS SENSÍVEIS', keyword: 'SENSQUEST', section: 'Demografia', icon: 'lock', color: 'blue' },
       { id: 3133, label: 'JORNAIS', keyword: 'NEWSPAPER', section: 'Mídia', icon: 'newspaper', color: 'indigo' },
@@ -668,26 +827,300 @@
       { id: 69678, label: 'OUTROS PRODUTOS (CPR)', keyword: 'SHOPPINGH', section: 'Bens de Consumo', icon: 'package', color: 'emerald' }
     ];
 
-    function getApiKey() {
-      // Prioridade: parâmetro de URL (?apikey=...), localStorage ou prompt
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlKey = urlParams.get('apikey');
-      if (urlKey) {
-        localStorage.setItem('tgi_api_key', urlKey);
-        return urlKey;
+    // Setores Base 2: TG BR 2023 R3 (2023r3_p - 40 setores com setor STREMUSIC dedicado)
+    const TGI_SECTORS_2023R3 = [
+      { id: 428, label: 'DADOS DEMOGRÁFICOS', keyword: 'DEMOGRAP', section: 'Demografia', icon: 'users', color: 'blue' },
+      { id: 2897, label: 'PERGUNTAS SENSÍVEIS', keyword: 'SENSQUEST', section: 'Demografia', icon: 'lock', color: 'blue' },
+      { id: 3140, label: 'JORNAIS', keyword: 'NEWSPAPER', section: 'Mídia', icon: 'newspaper', color: 'indigo' },
+      { id: 7495, label: 'TELEVISÃO', keyword: 'TELEVISION', section: 'Mídia', icon: 'tv', color: 'indigo' },
+      { id: 18311, label: 'REVISTAS', keyword: 'MAGAZINES', section: 'Mídia', icon: 'book-open', color: 'indigo' },
+      { id: 20130, label: 'CINEMA', keyword: 'CINEMA', section: 'Mídia', icon: 'film', color: 'indigo' },
+      { id: 20387, label: 'INTERNET', keyword: 'INTERNET', section: 'Mídia', icon: 'globe', color: 'indigo' },
+      { id: 23947, label: 'RÁDIO', keyword: 'RADIO', section: 'Mídia', icon: 'radio', color: 'indigo' },
+      { id: 26533, label: 'STREAMING DE MÚSICA/ PODCAST', keyword: 'STREMUSIC', section: 'Mídia', icon: 'music', color: 'indigo' },
+      { id: 26866, label: 'MÍDIA EXTERIOR/ OUT OF HOME', keyword: 'MEDIAOUT', section: 'Mídia', icon: 'map-pin', color: 'indigo' },
+      { id: 28146, label: 'PUBLICIDADE EM GERAL', keyword: 'ADVERTIS', section: 'Publicidade', icon: 'megaphone', color: 'amber' },
+      { id: 28888, label: 'PUBLICIDADE EM PONTO DE VENDA', keyword: 'POINTSB', section: 'Publicidade', icon: 'store', color: 'amber' },
+      { id: 28900, label: 'MARKETING BOCA-A-BOCA', keyword: 'WORDOF', section: 'Publicidade', icon: 'message-circle', color: 'amber' },
+      { id: 29935, label: 'EVENTOS NA VIDA', keyword: 'LIFEEVE', section: 'Atitudes', icon: 'heart', color: 'rose' },
+      { id: 30201, label: 'CLUSTERS PREDEFINIDOS', keyword: 'PREDCLUST', section: 'Atitudes', icon: 'pie-chart', color: 'rose' },
+      { id: 30347, label: 'SEGMENTAÇÕES', keyword: 'SEGMEN', section: 'Atitudes', icon: 'layers', color: 'rose' },
+      { id: 30947, label: 'CONSUMO DE MEIOS-MEDIAGRAPHICS', keyword: 'TOTAUDMED', section: 'Mídia', icon: 'activity', color: 'indigo' },
+      { id: 32209, label: 'OPINIÕES E ATITUDES', keyword: 'OPINIONS', section: 'Atitudes', icon: 'smile', color: 'rose' },
+      { id: 36807, label: 'DIÁRIO DE ATIVIDADES', keyword: 'TIMEDIARY', section: 'Atitudes', icon: 'clock', color: 'rose' },
+      { id: 39302, label: 'VESTUÁRIO/ ACESSÓRIOS/ ARTIGOS ESPORTIVOS', keyword: 'APPAREL', section: 'Bens de Consumo', icon: 'tag', color: 'emerald' },
+      { id: 39881, label: 'AUTOMÓVEIS E MOTOS', keyword: 'AUTOMOTIVE', section: 'Bens de Consumo', icon: 'truck', color: 'emerald' },
+      { id: 41641, label: 'TELECOMUNICAÇÕES E APLICATIVOS', keyword: 'TELECOMM', section: 'Bens de Consumo', icon: 'smartphone', color: 'emerald' },
+      { id: 42147, label: 'ELETRÔNICOS', keyword: 'ELECTRON', section: 'Bens de Consumo', icon: 'monitor', color: 'emerald' },
+      { id: 42877, label: 'ELETRODOMÉSTICOS/ ELETROPORTÁTEIS', keyword: 'APPLIANC', section: 'Bens de Consumo', icon: 'zap', color: 'emerald' },
+      { id: 43131, label: 'PRODUTOS FINANCEIROS/ SEGUROS (18+)', keyword: 'FINANCIAL', section: 'Bens de Consumo', icon: 'credit-card', color: 'emerald' },
+      { id: 44638, label: 'BEBIDAS E ALIMENTOS', keyword: 'FOODRINKRP', section: 'Bens de Consumo', icon: 'coffee', color: 'emerald' },
+      { id: 49098, label: 'BEBIDAS ALCOÓLICAS (18+)', keyword: 'ALCOHOLIC', section: 'Bens de Consumo', icon: 'glass', color: 'emerald' },
+      { id: 50985, label: 'RESTAURANTES E COMPRAS', keyword: 'RESTAURANT', section: 'Bens de Consumo', icon: 'shopping-bag', color: 'emerald' },
+      { id: 52271, label: 'VIAGENS/ ATIVIDADES RECREATIVAS', keyword: 'LEISURETRAV', section: 'Atitudes', icon: 'compass', color: 'rose' },
+      { id: 55142, label: 'PRODUTOS DE HIGIENE PESSOAL', keyword: 'PERSONALTG', section: 'Bens de Consumo', icon: 'shield', color: 'emerald' },
+      { id: 59312, label: 'PRODUTOS DE BELEZA/ MAQUIAGEM', keyword: 'PRODBELM', section: 'Bens de Consumo', icon: 'sparkles', color: 'emerald' },
+      { id: 60561, label: 'PRODUTOS DE HIGIENE PESSOAL FEMININO', keyword: 'PERSONALTF', section: 'Bens de Consumo', icon: 'feather', color: 'emerald' },
+      { id: 60808, label: 'PRODUTOS DE HIGIENE PESSOAL MASCULINO', keyword: 'PERSONALTM', section: 'Bens de Consumo', icon: 'shield-check', color: 'emerald' },
+      { id: 60870, label: 'REMÉDIOS-PERGUNTAS SENSÍVEIS', keyword: 'HEALTHPH', section: 'Bens de Consumo', icon: 'plus-circle', color: 'emerald' },
+      { id: 64193, label: 'OUTROS SERVIÇOS', keyword: 'OTHERSPROD', section: 'Bens de Consumo', icon: 'briefcase', color: 'emerald' },
+      { id: 64244, label: 'BEBIDAS E ALIMENTOS (CPR)', keyword: 'FOODRINKPS', section: 'Bens de Consumo', icon: 'shopping-cart', color: 'emerald' },
+      { id: 68603, label: 'ANIMAIS DOMÉSTICOS', keyword: 'HOUSEPET', section: 'Bens de Consumo', icon: 'github', color: 'emerald' },
+      { id: 68727, label: 'PRODUTOS PARA A CASA (CPR)', keyword: 'HOUSEPROD', section: 'Bens de Consumo', icon: 'home', color: 'emerald' },
+      { id: 69866, label: 'PRODUTOS PARA BEBÊS (CPR)', keyword: 'INFANTBABY', section: 'Bens de Consumo', icon: 'baby', color: 'emerald' },
+      { id: 69987, label: 'OUTROS PRODUTOS (CPR)', keyword: 'SHOPPINGH', section: 'Bens de Consumo', icon: 'package', color: 'emerald' }
+    ];
+
+    // Dicionário das Bases Homologadas
+    const SURVEY_BASES = {
+      'treinamento2_p': {
+        waveId: 'treinamento2_p',
+        family: 'bratgiptb',
+        techName: 'capacitabr2023r4__pw_cl',
+        title: 'BASE TRIAL BRASIL',
+        navSubtitle: 'BASE TRIAL BRASIL • Panorama de Informações',
+        accsClient: '_TGI_Latina',
+        bannerTitle: 'Ambiente Master Liberado • Company ACCS: <span class="font-mono text-orange-400">_TGI_Latina</span>',
+        bannerDesc: 'Acesso master configurado para América Latina com expiração em <span class="text-slate-200 font-semibold">2050</span>. Usuários autorizados: <span class="text-slate-300">eduardo.fonseca@ibope.com</span> e <span class="text-slate-300">antonio@ibope.com</span>.',
+        defaultUser: 'eduardo.fonseca@ibope.com',
+        lastPublished: '23-07-2026',
+        sampleSize: '24.576',
+        fieldworkUnits: '5 Units',
+        keyValidity: 'Ano 2050 (Master)',
+        sectors: TGI_SECTORS_TREINAMENTO,
+        streaming: {
+          video: {
+            pop: '50.093,05 mil',
+            penetration: '54,68%',
+            sample: 'Amostra: 13.918 respondentes',
+            menPct: '47,7%',
+            menPop: '23.891,37 mil',
+            menSample: 'Amostra: 6.579 casos',
+            menBarWidth: '47.69%',
+            womenPct: '52,3%',
+            womenPop: '26.201,68 mil',
+            womenSample: 'Amostra: 7.339 casos',
+            womenBarWidth: '52.31%',
+            netflixPop: '41.298,81 mil',
+            netflixMen: '♂ 46,6%',
+            netflixWomen: '♀ 53,4%',
+            btnLabel: 'Vídeo Total (54,68%)'
+          },
+          music: {
+            pop: '47.030,41 mil',
+            penetration: '51,33%',
+            sample: 'Amostra: 12.873 respondentes',
+            menPct: '49,2%',
+            menPop: '23.143,47 mil',
+            menSample: 'Amostra: 6.281 casos',
+            menBarWidth: '49.21%',
+            womenPct: '50,8%',
+            womenPop: '23.886,94 mil',
+            womenSample: 'Amostra: 6.592 casos',
+            womenBarWidth: '50.79%',
+            spotifyPop: '28.209,49 mil',
+            spotifyMen: '♂ 48,9%',
+            spotifyWomen: '♀ 51,1%',
+            btnLabel: 'Música Total (51,33%)'
+          }
+        }
+      },
+      '2023r3_p': {
+        waveId: '2023r3_p',
+        family: 'bratgiptb',
+        techName: 'br2023r3_cb_pw_cl',
+        title: 'TG BR 2023 R3',
+        navSubtitle: 'TG BR 2023 R3 • Panorama de Informações',
+        accsClient: 'LAT_Trial_Teste',
+        bannerTitle: 'Ambiente de Testes / Homologação &bull; Company ACCS: <span class="font-mono text-orange-400">LAT_Trial_Teste</span>',
+        bannerDesc: 'Pesquisa oficial de onda 2023r3_p com dicionário expandido de 40 setores (inclui setor streaming dedicado). Usuário autorizado: <span class="text-slate-300">trial@apikmr.com</span>.',
+        defaultUser: 'trial@apikmr.com',
+        lastPublished: '17-06-2024',
+        sampleSize: '24.576',
+        fieldworkUnits: '207.327.920',
+        keyValidity: 'Ativo (Trial Teste)',
+        sectors: TGI_SECTORS_2023R3,
+        streaming: {
+          video: {
+            pop: '49.574,03 mil',
+            penetration: '54,11%',
+            sample: 'Amostra: 13.786 respondentes',
+            menPct: '47,4%',
+            menPop: '23.498,39 mil',
+            menSample: 'Amostra: 6.473 casos',
+            menBarWidth: '47.40%',
+            womenPct: '52,6%',
+            womenPop: '26.075,64 mil',
+            womenSample: 'Amostra: 7.313 casos',
+            womenBarWidth: '52.60%',
+            netflixPop: '40.288,34 mil',
+            netflixMen: '♂ 46,7%',
+            netflixWomen: '♀ 53,3%',
+            btnLabel: 'Vídeo Total (54,11%)'
+          },
+          music: {
+            pop: '44.278,31 mil',
+            penetration: '48,33%',
+            sample: 'Amostra: 12.296 respondentes',
+            menPct: '49,5%',
+            menPop: '21.909,94 mil',
+            menSample: 'Amostra: 6.003 casos',
+            menBarWidth: '49.48%',
+            womenPct: '50,5%',
+            womenPop: '22.368,37 mil',
+            womenSample: 'Amostra: 6.293 casos',
+            womenBarWidth: '50.52%',
+            spotifyPop: '26.792,31 mil',
+            spotifyMen: '♂ 48,9%',
+            spotifyWomen: '♀ 51,1%',
+            btnLabel: 'Música Total (48,33%)'
+          }
+        }
       }
-      return localStorage.getItem('tgi_api_key') || '';
+    };
+
+    let activeBaseKey = 'treinamento2_p';
+
+    function getActiveBase() {
+      return SURVEY_BASES[activeBaseKey] || SURVEY_BASES['treinamento2_p'];
     }
 
-    function getUserId() {
-      return localStorage.getItem('tgi_user_id') || 'eduardo.fonseca@ibope.com';
+    // Obtenção segura de Credenciais (OWASP: sem chaves expostas no código, isoladas estritamente por base)
+    function getApiKey(baseKey = activeBaseKey) {
+      return localStorage.getItem(`tgi_api_key_${baseKey}`) || '';
+    }
+
+    function getUserId(baseKey = activeBaseKey) {
+      return localStorage.getItem(`tgi_user_id_${baseKey}`) || (SURVEY_BASES[baseKey] ? SURVEY_BASES[baseKey].defaultUser : 'eduardo.fonseca@ibope.com');
     }
 
     function updateNavBadges() {
       const user = getUserId();
+      const key = getApiKey();
       document.getElementById('activeUserText').innerText = user;
-      document.getElementById('connectionStatusBadge').classList.remove('hidden');
+      const statusBadge = document.getElementById('connectionStatusBadge');
+      if (key) {
+        statusBadge.classList.remove('hidden');
+        statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>API Conectada</span>`;
+      } else {
+        statusBadge.classList.remove('hidden');
+        statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Chave Pendente</span>`;
+      }
       document.getElementById('activeUserBadge').classList.remove('hidden');
+    }
+
+    function renderBaseData() {
+      const base = getActiveBase();
+
+      // Navbar e Banner
+      document.getElementById('navSubtitle').innerText = base.navSubtitle;
+      document.getElementById('bannerClientTitle').innerHTML = base.bannerTitle;
+      document.getElementById('bannerClientDesc').innerHTML = base.bannerDesc;
+      document.getElementById('badgeActiveBaseIndicator').innerText = base.waveId;
+
+      // Cards de Metadados
+      document.getElementById('metaSurveyTitle').innerText = base.title;
+      document.getElementById('metaSurveyName').innerText = base.techName;
+      document.getElementById('metaLastPublished').innerText = base.lastPublished;
+      document.getElementById('metaSampleSize').innerText = base.sampleSize;
+      document.getElementById('metaFieldworkUnits').innerText = base.fieldworkUnits;
+      document.getElementById('metaSurveyFamily').innerText = base.family;
+      document.getElementById('metaWaveName').innerText = `wave: ${base.waveId}`;
+      document.getElementById('metaAccsClient').innerText = base.accsClient;
+      document.getElementById('metaKeyValidity').innerText = base.keyValidity;
+
+      // Card Especial de Streaming
+      const v = base.streaming.video;
+      document.getElementById('streamVideoPop').innerText = v.pop;
+      document.getElementById('streamVideoPenetration').innerText = v.penetration;
+      document.getElementById('streamVideoSample').innerText = v.sample;
+      document.getElementById('streamVideoMenBar').innerText = v.menPct;
+      document.getElementById('streamVideoMenBar').style.width = v.menBarWidth;
+      document.getElementById('streamVideoWomenBar').innerText = v.womenPct;
+      document.getElementById('streamVideoWomenBar').style.width = v.womenBarWidth;
+      document.getElementById('streamVideoMenPct').innerText = v.menPct;
+      document.getElementById('streamVideoMenPop').innerText = v.menPop;
+      document.getElementById('streamVideoMenSample').innerText = v.menSample;
+      document.getElementById('streamVideoWomenPct').innerText = v.womenPct;
+      document.getElementById('streamVideoWomenPop').innerText = v.womenPop;
+      document.getElementById('streamVideoWomenSample').innerText = v.womenSample;
+      document.getElementById('streamNetflixPop').innerText = v.netflixPop;
+      document.getElementById('streamNetflixMen').innerText = v.netflixMen;
+      document.getElementById('streamNetflixWomen').innerText = v.netflixWomen;
+      document.getElementById('btnQuickVideoTotal').innerText = v.btnLabel;
+
+      const m = base.streaming.music;
+      document.getElementById('streamMusicPop').innerText = m.pop;
+      document.getElementById('streamMusicPenetration').innerText = m.penetration;
+      document.getElementById('streamMusicSample').innerText = m.sample;
+      document.getElementById('streamMusicMenBar').innerText = m.menPct;
+      document.getElementById('streamMusicMenBar').style.width = m.menBarWidth;
+      document.getElementById('streamMusicWomenBar').innerText = m.womenPct;
+      document.getElementById('streamMusicWomenBar').style.width = m.womenBarWidth;
+      document.getElementById('streamMusicMenPct').innerText = m.menPct;
+      document.getElementById('streamMusicMenPop').innerText = m.menPop;
+      document.getElementById('streamMusicMenSample').innerText = m.menSample;
+      document.getElementById('streamMusicWomenPct').innerText = m.womenPct;
+      document.getElementById('streamMusicWomenPop').innerText = m.womenPop;
+      document.getElementById('streamMusicWomenSample').innerText = m.womenSample;
+      document.getElementById('streamSpotifyPop').innerText = m.spotifyPop;
+      document.getElementById('streamSpotifyMen').innerText = m.spotifyMen;
+      document.getElementById('streamSpotifyWomen').innerText = m.spotifyWomen;
+      document.getElementById('btnQuickMusicTotal').innerText = m.btnLabel;
+
+      // Setores
+      document.getElementById('sectorSectionTitle').innerText = `Mapa Setorial da Pesquisa (${base.sectors.length} Categorias TGI Brasil)`;
+      document.getElementById('sectorCountBadge').innerHTML = `Nível Root &bull; Total: ${base.sectors.length} Setores`;
+      renderSectorsGrid(base.sectors);
+
+      updateNavBadges();
+      lucide.createIcons();
+    }
+
+    function switchBase(newBaseKey) {
+      if (!SURVEY_BASES[newBaseKey]) return;
+      activeBaseKey = newBaseKey;
+      document.getElementById('selectActiveBase').value = newBaseKey;
+
+      // Mantém a URL sincronizada com a base ativa e sua respectiva chave
+      const url = new URL(window.location.href);
+      url.searchParams.set('base', newBaseKey);
+      const currentKey = localStorage.getItem(`tgi_api_key_${newBaseKey}`);
+      const currentUser = localStorage.getItem(`tgi_user_id_${newBaseKey}`);
+      if (currentKey) {
+        url.searchParams.set('apikey', currentKey);
+      } else {
+        url.searchParams.delete('apikey');
+      }
+      if (currentUser) {
+        url.searchParams.set('user', currentUser);
+      } else {
+        url.searchParams.delete('user');
+      }
+      window.history.replaceState({}, '', url.toString());
+
+      renderBaseData();
+
+      // Reseta histórico do explorador em árvore para a raiz da nova base
+      treeNavigationHistory = [{ id: 'root', label: 'Raiz (' + SURVEY_BASES[newBaseKey].sectors.length + ' Setores)' }];
+      renderTreeBreadcrumbs();
+      closeTreeQuestionDetail();
+      if (!document.getElementById('dictTabTree').classList.contains('hidden')) {
+        navigateTreeLevel('root', 'Raiz (' + SURVEY_BASES[newBaseKey].sectors.length + ' Setores)', true);
+      }
+
+      const key = getApiKey(newBaseKey);
+      if (key) {
+        document.getElementById('missingKeyAlert').classList.add('hidden');
+        loadSurveyInfo();
+        executeExpression();
+      } else {
+        document.getElementById('missingKeyAlert').classList.remove('hidden');
+        document.getElementById('resBadgeStatus').className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        document.getElementById('resBadgeStatus').innerText = 'Chave Necessária';
+        document.getElementById('resStatusCode').innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Sem Chave</span>`;
+        openAuthModal(newBaseKey);
+      }
     }
 
     function toggleStreamingCardDetails() {
@@ -714,16 +1147,16 @@
       card.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    function renderSectorsGrid() {
+    function renderSectorsGrid(sectorsList) {
       const container = document.getElementById('categoriesGrid');
-      container.innerHTML = TGI_SECTORS.map(sec => {
+      container.innerHTML = sectorsList.map(sec => {
         let badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
         if (sec.section === 'Mídia') badgeColor = 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30';
         if (sec.section === 'Publicidade') badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/30';
         if (sec.section === 'Atitudes') badgeColor = 'bg-rose-500/10 text-rose-400 border-rose-500/30';
         if (sec.section === 'Bens de Consumo') badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
 
-        const isStreaming = sec.id === 23629 || sec.label.includes('STREAMING');
+        const isStreaming = sec.keyword === 'STREMUSIC' || sec.id === 23629 || sec.label.includes('STREAMING');
 
         return `
           <div class="glass-card rounded-xl p-4 hover:border-slate-700 transition flex flex-col justify-between ${isStreaming ? 'border-orange-500/50 bg-orange-950/20' : ''}">
@@ -746,6 +1179,10 @@
               <span class="text-slate-400">Keyword:</span>
               <div class="flex items-center space-x-1.5">
                 <code class="font-mono text-orange-400 bg-slate-900 px-1.5 py-0.5 rounded">${sec.keyword}</code>
+                <button onclick="openSectorInTree('${sec.id}', '${sec.label.replace(/'/g, "\\'")}')" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-[10px] transition border border-slate-700 flex items-center space-x-1">
+                  <i data-lucide="git-branch" class="w-3 h-3 text-slate-400"></i>
+                  <span>Explorar</span>
+                </button>
                 ${isStreaming ? `
                   <button onclick="scrollToStreamingCard()" class="px-2 py-0.5 rounded bg-orange-600 hover:bg-orange-500 text-white font-medium text-[10px] transition">
                     Ver %
@@ -760,25 +1197,27 @@
     }
 
     async function loadSurveyInfo() {
+      const base = getActiveBase();
       const apiKey = getApiKey();
       const userId = getUserId();
       updateNavBadges();
+      if (!apiKey) return;
 
       try {
-        const url = `${API_BASE}/survey/${SURVEY_FAMILY}/wave/${WAVE_NAME}/info?userid=${encodeURIComponent(userId)}&apikey=${apiKey}`;
+        const url = `${API_BASE}/survey/${base.family}/wave/${base.waveId}/info?userid=${encodeURIComponent(userId)}&apikey=${apiKey}`;
         const res = await fetch(url);
         if (res.ok) {
           const json = await res.json();
           if (json.results && json.results.length > 0) {
             const data = json.results[0];
-            document.getElementById('metaSurveyTitle').innerText = data.title || 'BASE TRIAL BRASIL';
-            document.getElementById('metaSurveyName').innerText = data.name || 'capacitabr2023r4__pw_cl';
+            if (data.title) document.getElementById('metaSurveyTitle').innerText = data.title;
+            if (data.name) document.getElementById('metaSurveyName').innerText = data.name;
             if (data.samplesize) {
               const num = parseInt(data.samplesize).toLocaleString('pt-BR');
               document.getElementById('metaSampleSize').innerText = num;
             }
             if (data['fieldwork-units']) {
-              document.getElementById('metaFieldworkUnits').innerText = `${data['fieldwork-units']} Unidades`;
+              document.getElementById('metaFieldworkUnits').innerText = `${data['fieldwork-units']} Units`;
             }
           }
         }
@@ -794,23 +1233,52 @@
     }
 
     async function executeExpression() {
+      const base = getActiveBase();
       const apiKey = getApiKey();
       const userId = getUserId();
       const expr = document.getElementById('inputExpression').value.trim();
       if (!expr) return;
 
+      const missingAlert = document.getElementById('missingKeyAlert');
+      const errBanner = document.getElementById('exprErrorBanner');
+      const errText = document.getElementById('exprErrorText');
+      const cardsCont = document.getElementById('cardsContainer');
+      const badgeStatus = document.getElementById('resBadgeStatus');
+      const currentExprName = document.getElementById('resCurrentExprName');
+
+      // Validação prévia de credenciais
+      if (!apiKey) {
+        missingAlert.classList.remove('hidden');
+        errBanner.classList.add('hidden');
+        badgeStatus.className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        badgeStatus.innerText = 'Chave Necessária';
+        document.getElementById('resStatusCode').innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Sem Chave</span>`;
+        openAuthModal(base.waveId);
+        return;
+      }
+
+      missingAlert.classList.add('hidden');
+      errBanner.classList.add('hidden');
+
+      // Estado de Carregamento Visual
       const btn = document.getElementById('btnRunExpression');
       const originalText = btn.innerHTML;
       btn.innerHTML = `<span class="animate-spin inline-block mr-2">&bull;</span> Consultando API...`;
       btn.disabled = true;
 
+      badgeStatus.className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-500/20 text-blue-400 border border-blue-500/30 animate-pulse';
+      badgeStatus.innerText = 'Consultando...';
+      cardsCont.classList.add('opacity-50');
+
       try {
-        const url = `${API_BASE}/survey/${SURVEY_FAMILY}/wave/${WAVE_NAME}/report/expression?base64=false&userid=${encodeURIComponent(userId)}&apikey=${apiKey}`;
+        const url = `${API_BASE}/survey/${base.family}/wave/${base.waveId}/report/expression?base64=false&userid=${encodeURIComponent(userId)}&apikey=${apiKey}`;
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(expr)
         });
+
+        cardsCont.classList.remove('opacity-50');
 
         if (res.ok) {
           const json = await res.json();
@@ -836,14 +1304,49 @@
               document.getElementById('resIndex').innerText = Math.round(mapVal[4]).toString();
             }
 
+            const now = new Date().toLocaleTimeString('pt-BR');
             document.getElementById('resStatusCode').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>200 OK</span>`;
             document.getElementById('resExprEcho').innerText = `expr: ${expr}`;
+
+            badgeStatus.className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+            badgeStatus.innerText = `✓ Atualizado (${now})`;
+            currentExprName.innerHTML = `expr: <span class="text-orange-400 font-bold">${expr}</span>`;
+
+            // Destaque visual luminoso de confirmação
+            cardsCont.classList.add('ring-2', 'ring-emerald-500/70', 'bg-emerald-950/20');
+            setTimeout(() => {
+              cardsCont.classList.remove('ring-2', 'ring-emerald-500/70', 'bg-emerald-950/20');
+            }, 1200);
+          } else {
+            throw new Error('Formato de resposta inesperado da API.');
           }
         } else {
+          let errDetail = `${res.status} ${res.statusText}`;
+          try {
+            const errJson = await res.json();
+            if (errJson.status) errDetail = `${errJson.code || res.status}: ${errJson.status}`;
+          } catch (_) {}
+
           document.getElementById('resStatusCode').innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span><span>${res.status} Erro</span>`;
+          badgeStatus.className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-rose-500/20 text-rose-400 border border-rose-500/30';
+          badgeStatus.innerText = 'Falha na Consulta';
+
+          errBanner.classList.remove('hidden');
+          errText.innerHTML = `<strong>Erro na consulta (${errDetail}):</strong> Verifique se a expressão <code>${expr}</code> existe na base <em>${base.title}</em> e se as credenciais cadastradas estão ativas.`;
+
+          cardsCont.classList.add('ring-2', 'ring-rose-500/50', 'bg-rose-950/10');
+          setTimeout(() => {
+            cardsCont.classList.remove('ring-2', 'ring-rose-500/50', 'bg-rose-950/10');
+          }, 1500);
         }
       } catch (e) {
-        document.getElementById('resStatusCode').innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span><span>Erro Conexão</span>`;
+        cardsCont.classList.remove('opacity-50');
+        document.getElementById('resStatusCode').innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-500"></span><span>Erro Rede</span>`;
+        badgeStatus.className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        badgeStatus.innerText = 'Erro de Conexão';
+
+        errBanner.classList.remove('hidden');
+        errText.innerHTML = `<strong>Falha de Conexão:</strong> Não foi possível comunicar com a API TGI (${e.message}). Verifique sua conexão ou se a chave informada é válida.`;
       } finally {
         btn.innerHTML = originalText;
         btn.disabled = false;
@@ -852,9 +1355,9 @@
     }
 
     // Modal de Credenciais
-    function openAuthModal() {
-      document.getElementById('modalApiKey').value = localStorage.getItem('tgi_api_key') || '';
-      document.getElementById('modalUserId').value = getUserId();
+    function openAuthModal(targetBaseKey = activeBaseKey) {
+      document.getElementById('modalBaseSelect').value = targetBaseKey;
+      syncModalCredentialsWithBase(targetBaseKey);
       document.getElementById('authModal').classList.remove('hidden');
     }
 
@@ -862,35 +1365,489 @@
       document.getElementById('authModal').classList.add('hidden');
     }
 
+    function syncModalCredentialsWithBase(baseKey) {
+      const key = localStorage.getItem(`tgi_api_key_${baseKey}`) || '';
+      const user = localStorage.getItem(`tgi_user_id_${baseKey}`) || (SURVEY_BASES[baseKey] ? SURVEY_BASES[baseKey].defaultUser : '');
+      document.getElementById('modalApiKey').value = key;
+
+      const presetSelect = document.getElementById('modalUserIdPreset');
+      const customInput = document.getElementById('modalUserIdCustom');
+
+      let found = false;
+      for (let i = 0; i < presetSelect.options.length; i++) {
+        if (presetSelect.options[i].value === user) {
+          presetSelect.selectedIndex = i;
+          found = true;
+          break;
+        }
+      }
+      if (!found && user) {
+        presetSelect.value = 'custom';
+        customInput.classList.remove('hidden');
+        customInput.value = user;
+      } else {
+        customInput.classList.add('hidden');
+        customInput.value = '';
+      }
+    }
+
+    function handlePresetUserChange(val) {
+      const customInput = document.getElementById('modalUserIdCustom');
+      if (val === 'custom') {
+        customInput.classList.remove('hidden');
+        customInput.focus();
+      } else {
+        customInput.classList.add('hidden');
+      }
+    }
+
     async function saveAndTestCredentials() {
+      const baseKey = document.getElementById('modalBaseSelect').value;
       const key = document.getElementById('modalApiKey').value.trim();
-      const user = document.getElementById('modalUserId').value.trim();
-      if (!key || !user) return;
+      const presetUser = document.getElementById('modalUserIdPreset').value;
+      const user = presetUser === 'custom' ? document.getElementById('modalUserIdCustom').value.trim() : presetUser;
 
-      localStorage.setItem('tgi_api_key', key);
-      localStorage.setItem('tgi_user_id', user);
+      if (!key || !user) {
+        alert('Por favor, informe a API Key e o Usuário Autorizado.');
+        return;
+      }
 
-      updateNavBadges();
+      // Salva isolado estritamente por base (sem contaminar globalmente)
+      localStorage.setItem(`tgi_api_key_${baseKey}`, key);
+      localStorage.setItem(`tgi_user_id_${baseKey}`, user);
+      localStorage.removeItem('tgi_api_key');
+      localStorage.removeItem('tgi_user_id');
+
+      if (baseKey !== activeBaseKey) {
+        switchBase(baseKey);
+      } else {
+        updateNavBadges();
+      }
+
       closeAuthModal();
       await loadSurveyInfo();
       await executeExpression();
     }
 
     function clearCredentials() {
+      const baseKey = document.getElementById('modalBaseSelect').value;
+      localStorage.removeItem(`tgi_api_key_${baseKey}`);
+      localStorage.removeItem(`tgi_user_id_${baseKey}`);
       localStorage.removeItem('tgi_api_key');
       localStorage.removeItem('tgi_user_id');
       document.getElementById('modalApiKey').value = '';
       updateNavBadges();
-      alert('Credenciais locais removidas.');
+      alert(`Credenciais da base ${baseKey} removidas do navegador.`);
+    }
+
+    // ==========================================
+    // DICIONÁRIO DE VARIÁVEIS & NAVEGADOR HIERÁRQUICO
+    // ==========================================
+
+    const CURATED_VARIABLES = [
+      // Demografia & Sexo
+      { category: 'Demografia & Sexo', label: 'Feminino (Mulheres)', question: 'Sexo do Respondente', keyword: 'MDPDSXFM', desc: 'Mulheres entrevistadas no survey' },
+      { category: 'Demografia & Sexo', label: 'Masculino (Homens)', question: 'Sexo do Respondente', keyword: 'MDPDSXMS', desc: 'Homens entrevistados no survey' },
+
+      // Faixas Etárias
+      { category: 'Idade / Gerações', label: '12 a 19 anos', question: 'Faixa Etária do Respondente', keyword: 'MDPDRE12', desc: 'Adolescentes e Jovens de 12 a 19 anos' },
+      { category: 'Idade / Gerações', label: '20 a 24 anos', question: 'Faixa Etária do Respondente', keyword: 'MDPDRE20', desc: 'Jovens adultos de 20 a 24 anos' },
+      { category: 'Idade / Gerações', label: '25 a 34 anos', question: 'Faixa Etária do Respondente', keyword: 'MDPDRE25', desc: 'Adultos de 25 a 34 anos' },
+      { category: 'Idade / Gerações', label: '35 a 44 anos', question: 'Faixa Etária do Respondente', keyword: 'MDPDRE35', desc: 'Adultos de 35 a 44 anos' },
+      { category: 'Idade / Gerações', label: '45 a 54 anos', question: 'Faixa Etária do Respondente', keyword: 'MDPDRE45', desc: 'Adultos de 45 a 54 anos' },
+      { category: 'Idade / Gerações', label: '55 a 64 anos', question: 'Faixa Etária do Respondente', keyword: 'MDPDRE55', desc: 'Adultos maduros de 55 a 64 anos' },
+      { category: 'Idade / Gerações', label: '65 a 75 anos', question: 'Faixa Etária do Respondente', keyword: 'MDPDRE65', desc: 'Idosos de 65 a 75 anos' },
+
+      // Classe Econômica (NSE Brasil)
+      { category: 'Classe Social (NSE)', label: 'Classe AB (Total)', question: 'NSE - Critério Brasil', keyword: 'NSEBRA01', desc: 'Classes A e B unificadas' },
+      { category: 'Classe Social (NSE)', label: 'Classe A', question: 'NSE - Critério Brasil', keyword: 'O31982684', desc: 'Alta renda / Classe A' },
+      { category: 'Classe Social (NSE)', label: 'Classe B', question: 'NSE - Critério Brasil', keyword: 'O31982685', desc: 'Média-alta renda / Classe B' },
+      { category: 'Classe Social (NSE)', label: 'Classe C', question: 'NSE - Critério Brasil', keyword: 'NSEBRA02', desc: 'Média renda / Classe C' },
+      { category: 'Classe Social (NSE)', label: 'Classe DE', question: 'NSE - Critério Brasil', keyword: 'NSEBRA03', desc: 'Baixa renda / Classes D e E' },
+
+      // Estado Civil
+      { category: 'Estado Civil', label: 'Casado(a)', question: 'Estado Civil do Respondente', keyword: 'MDPDECCA', desc: 'Casados formalmente' },
+      { category: 'Estado Civil', label: 'Solteiro(a)', question: 'Estado Civil do Respondente', keyword: 'MDPDECSO', desc: 'Solteiros / Nunca se casou' },
+      { category: 'Estado Civil', label: 'União Estável', question: 'Estado Civil do Respondente', keyword: 'MDPDECEP', desc: 'Mora com companheiro(a)' },
+      { category: 'Estado Civil', label: 'Viúvo(a)', question: 'Estado Civil do Respondente', keyword: 'MDPDECVI', desc: 'Viúvos' },
+      { category: 'Estado Civil', label: 'Divorciado(a)', question: 'Estado Civil do Respondente', keyword: 'MDPDECDI', desc: 'Divorciados legalmente' },
+      { category: 'Estado Civil', label: 'Separado(a)', question: 'Estado Civil do Respondente', keyword: 'MDPDECSE', desc: 'Separados de fato' },
+
+      // Regiões Metropolitanas
+      { category: 'Regiões / Mercados', label: 'RM São Paulo', question: 'Principal Área Metropolitana', keyword: 'SAOPAULO', desc: 'Grande São Paulo' },
+      { category: 'Regiões / Mercados', label: 'RM Rio de Janeiro', question: 'Principal Área Metropolitana', keyword: 'RIODEJAN', desc: 'Grande Rio de Janeiro' },
+      { category: 'Regiões / Mercados', label: 'RM Belo Horizonte', question: 'Principal Área Metropolitana', keyword: 'BELOHOR', desc: 'Grande Belo Horizonte' },
+      { category: 'Regiões / Mercados', label: 'Brasília (DF)', question: 'Principal Área Metropolitana', keyword: 'BRASILIA', desc: 'Distrito Federal e entorno' },
+      { category: 'Regiões / Mercados', label: 'RM Curitiba', question: 'Principal Área Metropolitana', keyword: 'CURITIBA', desc: 'Grande Curitiba' },
+      { category: 'Regiões / Mercados', label: 'RM Porto Alegre', question: 'Principal Área Metropolitana', keyword: 'PORTOALE', desc: 'Grande Porto Alegre' },
+      { category: 'Regiões / Mercados', label: 'RM Salvador', question: 'Principal Área Metropolitana', keyword: 'SALVADOR', desc: 'Grande Salvador' },
+      { category: 'Regiões / Mercados', label: 'RM Recife', question: 'Principal Área Metropolitana', keyword: 'RECIFE', desc: 'Grande Recife' },
+      { category: 'Regiões / Mercados', label: 'RM Fortaleza', question: 'Principal Área Metropolitana', keyword: 'FORTALEZ', desc: 'Grande Fortaleza' },
+      { category: 'Regiões / Mercados', label: 'RM Campinas', question: 'Principal Área Metropolitana', keyword: '16W2535462', desc: 'Região de Campinas (SP)' },
+
+      // Streaming de Vídeo Pago
+      { category: 'Streaming de Vídeo', label: 'Total Vídeo Pago (U30d)', question: 'Serviços de Streaming Pago', keyword: '14W157052183', desc: 'Assistiu streaming pago nos últimos 30 dias' },
+      { category: 'Streaming de Vídeo', label: 'Netflix (U30d)', question: 'Streaming Pago por Plataforma', keyword: '14W155621113', desc: 'Assistiu Netflix nos últimos 30 dias' },
+      { category: 'Streaming de Vídeo', label: 'Amazon Prime Video (U30d)', question: 'Streaming Pago por Plataforma', keyword: '18W1767682', desc: 'Assistiu Prime Video nos últimos 30 dias' },
+      { category: 'Streaming de Vídeo', label: 'Disney+ (U30d)', question: 'Streaming Pago por Plataforma', keyword: '22W1536487', desc: 'Assistiu Disney+ nos últimos 30 dias' },
+      { category: 'Streaming de Vídeo', label: 'HBO Max (U30d)', question: 'Streaming Pago por Plataforma', keyword: '17W1768326', desc: 'Assistiu HBO Max nos últimos 30 dias' },
+      { category: 'Streaming de Vídeo', label: 'Globo Play (U30d)', question: 'Streaming Pago por Plataforma', keyword: '17W1536438', desc: 'Assistiu Globoplay nos últimos 30 dias' },
+      { category: 'Streaming de Vídeo', label: 'YouTube Premium (U30d)', question: 'Streaming Pago por Plataforma', keyword: 'B231575118', desc: 'Assistiu YouTube Premium nos últimos 30 dias' },
+
+      // Streaming de Música
+      { category: 'Streaming de Música', label: 'Total Música (Costuma Ouvir)', question: 'Hábitos de Áudio e Música', keyword: 'B221542445', desc: 'Costuma ouvir streaming de música' },
+      { category: 'Streaming de Música', label: 'Spotify (U30d)', question: 'Streaming de Música por Marca', keyword: 'B221538003', desc: 'Ouviu Spotify nos últimos 30 dias' }
+    ];
+
+    let currentCuratedCategory = 'Todos';
+    let currentCuratedSearch = '';
+    let treeNavigationHistory = [{ id: 'root', label: 'Raiz (40 Setores)' }];
+
+    function switchDictTab(tab) {
+      const btnCurated = document.getElementById('tabBtnCurated');
+      const btnTree = document.getElementById('tabBtnTree');
+      const viewCurated = document.getElementById('dictTabCurated');
+      const viewTree = document.getElementById('dictTabTree');
+
+      if (tab === 'curated') {
+        btnCurated.className = 'px-3 py-1.5 rounded-lg font-semibold bg-orange-600 text-white transition shadow-sm flex items-center space-x-1.5';
+        btnTree.className = 'px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition flex items-center space-x-1.5';
+        viewCurated.classList.remove('hidden');
+        viewTree.classList.add('hidden');
+      } else {
+        btnTree.className = 'px-3 py-1.5 rounded-lg font-semibold bg-orange-600 text-white transition shadow-sm flex items-center space-x-1.5';
+        btnCurated.className = 'px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition flex items-center space-x-1.5';
+        viewTree.classList.remove('hidden');
+        viewCurated.classList.add('hidden');
+
+        // Se a árvore ainda não foi carregada, inicializa na raiz
+        if (treeNavigationHistory.length === 1 && document.getElementById('treeNodesGrid').children.length === 0) {
+          navigateTreeLevel('root', 'Raiz (40 Setores)', true);
+        }
+      }
+      lucide.createIcons();
+    }
+
+    function renderCuratedCategoryPills() {
+      const categories = ['Todos', 'Demografia & Sexo', 'Idade / Gerações', 'Classe Social (NSE)', 'Estado Civil', 'Regiões / Mercados', 'Streaming de Vídeo', 'Streaming de Música'];
+      const container = document.getElementById('curatedCategoryPills');
+      container.innerHTML = categories.map(cat => {
+        const isActive = cat === currentCuratedCategory;
+        const activeClass = isActive ? 'bg-orange-600 text-white font-semibold shadow-sm' : 'bg-slate-800 text-slate-300 hover:bg-slate-700';
+        return `
+          <button onclick="selectCuratedCategory('${cat}')" class="px-2.5 py-1 rounded-lg border border-slate-700 whitespace-nowrap transition ${activeClass}">
+            ${cat}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectCuratedCategory(cat) {
+      currentCuratedCategory = cat;
+      renderCuratedCategoryPills();
+      renderCuratedVariables();
+    }
+
+    function handleCuratedSearch(query) {
+      currentCuratedSearch = query.trim().toLowerCase();
+      renderCuratedVariables();
+    }
+
+    function renderCuratedVariables() {
+      const grid = document.getElementById('curatedVariablesGrid');
+      const filtered = CURATED_VARIABLES.filter(v => {
+        const matchCategory = currentCuratedCategory === 'Todos' || v.category === currentCuratedCategory;
+        const matchSearch = !currentCuratedSearch ||
+          v.label.toLowerCase().includes(currentCuratedSearch) ||
+          v.keyword.toLowerCase().includes(currentCuratedSearch) ||
+          v.question.toLowerCase().includes(currentCuratedSearch) ||
+          v.desc.toLowerCase().includes(currentCuratedSearch);
+        return matchCategory && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-8 text-center text-xs text-slate-400">
+            Nenhuma variável encontrada para os filtros aplicados.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(v => {
+        let badgeColor = 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+        if (v.category.includes('Streaming')) badgeColor = 'bg-orange-500/10 text-orange-400 border-orange-500/30';
+        if (v.category.includes('Classe')) badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30';
+        if (v.category.includes('Idade')) badgeColor = 'bg-purple-500/10 text-purple-400 border-purple-500/30';
+        if (v.category.includes('Regiões')) badgeColor = 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30';
+
+        return `
+          <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 hover:border-slate-700 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-1.5">
+                <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded border ${badgeColor}">
+                  ${v.category}
+                </span>
+                <code class="font-mono text-xs font-bold text-orange-400 bg-slate-950 px-2 py-0.5 rounded border border-orange-500/30">${v.keyword}</code>
+              </div>
+              <h4 class="text-xs font-bold text-white tracking-tight">${v.label}</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">${v.question}</p>
+            </div>
+
+            <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between gap-2">
+              <span class="text-[10px] text-slate-500 truncate">${v.desc}</span>
+              <div class="flex items-center space-x-1.5 shrink-0">
+                <button onclick="applyVariable('${v.keyword}', '${v.label.replace(/'/g, "\\'")}')" class="px-2 py-1 rounded bg-orange-600 hover:bg-orange-500 text-white font-medium text-[10px] transition flex items-center space-x-1 shadow-sm">
+                  <i data-lucide="play" class="w-2.5 h-2.5"></i>
+                  <span>Usar</span>
+                </button>
+                <button onclick="appendVariableAnd('${v.keyword}')" title="Combinar com a expressão atual com AND" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-[10px] transition border border-slate-700">
+                  + AND
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function applyVariable(keyword, label) {
+      document.getElementById('inputExpression').value = keyword;
+      document.getElementById('exprLabelHelper').innerText = label;
+      document.getElementById('inputExpression').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      executeExpression();
+    }
+
+    function appendVariableAnd(keyword) {
+      const input = document.getElementById('inputExpression');
+      const current = input.value.trim();
+      if (!current) {
+        input.value = keyword;
+      } else {
+        input.value = `(${current}) AND (${keyword})`;
+      }
+      document.getElementById('exprLabelHelper').innerText = 'Expressão Combinada';
+      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      executeExpression();
+    }
+
+    // ==========================================
+    // NAVEGADOR EM ÁRVORE DA API TGI
+    // ==========================================
+
+    async function navigateTreeLevel(levelId, label, isReset = false) {
+      const base = getActiveBase();
+      const apiKey = getApiKey();
+      const userId = getUserId();
+
+      if (!apiKey) {
+        openAuthModal(base.waveId);
+        return;
+      }
+
+      if (isReset) {
+        treeNavigationHistory = [{ id: levelId, label: label }];
+      } else {
+        const existingIdx = treeNavigationHistory.findIndex(item => item.id === levelId);
+        if (existingIdx !== -1) {
+          treeNavigationHistory = treeNavigationHistory.slice(0, existingIdx + 1);
+        } else {
+          treeNavigationHistory.push({ id: levelId, label: label });
+        }
+      }
+
+      renderTreeBreadcrumbs();
+      closeTreeQuestionDetail();
+
+      const loading = document.getElementById('treeLoadingIndicator');
+      const grid = document.getElementById('treeNodesGrid');
+      loading.classList.remove('hidden');
+      grid.innerHTML = '';
+
+      try {
+        const url = `${API_BASE}/survey/${base.family}/wave/${base.waveId}/dictionary/ptb/level/${encodeURIComponent(levelId)}?userid=${encodeURIComponent(userId)}&apikey=${apiKey}`;
+        const res = await fetch(url);
+        loading.classList.add('hidden');
+
+        if (res.ok) {
+          const json = await res.json();
+          const results = json.results || [];
+
+          if (results.length === 0) {
+            grid.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-slate-400">Nenhum item filho encontrado neste nível.</div>`;
+            return;
+          }
+
+          grid.innerHTML = results.map(node => {
+            const isQuestion = node.type === 1 || node.questionid !== null;
+            const targetId = node.questionid || node.id;
+            const cleanLabel = (node.label || 'Sem Título').replace(/'/g, "\\'");
+
+            if (isQuestion) {
+              return `
+                <div class="bg-slate-900/90 border border-slate-800 hover:border-orange-500/50 rounded-xl p-3.5 transition flex flex-col justify-between">
+                  <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        Pergunta / Variável
+                      </span>
+                      <code class="font-mono text-[11px] text-slate-400">${node.keyword || ''}</code>
+                    </div>
+                    <h4 class="text-xs font-bold text-white">${node.label}</h4>
+                    ${node.longLabel ? `<p class="text-[11px] text-slate-400 mt-1 line-clamp-2">${node.longLabel}</p>` : ''}
+                  </div>
+                  <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-end">
+                    <button onclick="loadTreeQuestion('${targetId}', '${cleanLabel}', '${node.keyword || ''}')" class="px-2.5 py-1 rounded bg-orange-600 hover:bg-orange-500 text-white font-medium text-[10px] transition flex items-center space-x-1 shadow-sm">
+                      <i data-lucide="list" class="w-3 h-3"></i>
+                      <span>Ver Opções & Keywords</span>
+                    </button>
+                  </div>
+                </div>
+              `;
+            } else {
+              return `
+                <div onclick="navigateTreeLevel('${node.id}', '${cleanLabel}')" class="bg-slate-900/90 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-850 rounded-xl p-3.5 transition cursor-pointer flex flex-col justify-between group">
+                  <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/30">
+                        Sub-Tópico / Categoria
+                      </span>
+                      <code class="font-mono text-[11px] text-slate-500">${node.keyword || ''}</code>
+                    </div>
+                    <h4 class="text-xs font-bold text-white group-hover:text-blue-400 transition">${node.label}</h4>
+                    ${node.longLabel && node.longLabel !== node.label ? `<p class="text-[11px] text-slate-400 mt-1 line-clamp-2">${node.longLabel}</p>` : ''}
+                  </div>
+                  <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 group-hover:text-blue-300">
+                    <span>Navegar sub-nível</span>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                  </div>
+                </div>
+              `;
+            }
+          }).join('');
+          lucide.createIcons();
+        } else {
+          grid.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-rose-400">Erro ${res.status} ao consultar nível da árvore. Verifique suas credenciais.</div>`;
+        }
+      } catch (err) {
+        loading.classList.add('hidden');
+        grid.innerHTML = `<div class="col-span-full py-8 text-center text-xs text-rose-400">Falha de conexão com a API TGI.</div>`;
+      }
+    }
+
+    function renderTreeBreadcrumbs() {
+      const trail = document.getElementById('treeBreadcrumbTrail');
+      trail.innerHTML = treeNavigationHistory.map((step, idx) => {
+        const isLast = idx === treeNavigationHistory.length - 1;
+        const cleanLabel = step.label.replace(/'/g, "\\'");
+        if (isLast) {
+          return `<span class="text-white font-semibold">${step.label}</span>`;
+        } else {
+          return `
+            <button onclick="navigateTreeLevel('${step.id}', '${cleanLabel}')" class="text-orange-400 hover:underline">
+              ${step.label}
+            </button>
+            <span class="text-slate-600">/</span>
+          `;
+        }
+      }).join('');
+    }
+
+    async function loadTreeQuestion(questionId, label, keyword) {
+      const base = getActiveBase();
+      const apiKey = getApiKey();
+      const userId = getUserId();
+      const panel = document.getElementById('treeQuestionDetail');
+      const answersList = document.getElementById('treeAnswersList');
+
+      panel.classList.remove('hidden');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      document.getElementById('treeQuestionLabel').innerText = label;
+      document.getElementById('treeQuestionKeyword').innerText = `Keyword da Pergunta: ${keyword || 'N/A'} • ID: ${questionId}`;
+      answersList.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-slate-400">Carregando respostas oficiais...</div>`;
+
+      try {
+        const url = `${API_BASE}/survey/${base.family}/wave/${base.waveId}/dictionary/ptb/question/${encodeURIComponent(questionId)}?userid=${encodeURIComponent(userId)}&apikey=${apiKey}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const json = await res.json();
+          const qData = json.results && json.results[0];
+          const answers = (qData && qData.answers) || [];
+
+          if (answers.length === 0) {
+            answersList.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-slate-400">Nenhuma resposta encontrada para esta variável.</div>`;
+            return;
+          }
+
+          answersList.innerHTML = answers.map(ans => {
+            const cleanLabel = (ans.label || '').replace(/'/g, "\\'");
+            return `
+              <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3">
+                <div>
+                  <div class="text-xs font-bold text-white">${ans.label}</div>
+                  <div class="text-[11px] font-mono text-orange-400 mt-0.5">
+                    Keyword: <code>${ans.keyword}</code>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-1.5 shrink-0">
+                  <button onclick="applyVariable('${ans.keyword}', '${cleanLabel}')" class="px-2 py-1 rounded bg-orange-600 hover:bg-orange-500 text-white font-medium text-[10px] transition shadow-sm">
+                    Usar
+                  </button>
+                  <button onclick="appendVariableAnd('${ans.keyword}')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-[10px] transition border border-slate-700">
+                    + AND
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          answersList.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-rose-400">Erro ${res.status} ao obter respostas da pergunta.</div>`;
+        }
+      } catch (err) {
+        answersList.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-rose-400">Falha ao carregar detalhes da pergunta.</div>`;
+      }
+    }
+
+    function closeTreeQuestionDetail() {
+      document.getElementById('treeQuestionDetail').classList.add('hidden');
+    }
+
+    function openSectorInTree(sectorId, sectorLabel) {
+      document.getElementById('sectionDictionary').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      switchDictTab('tree');
+      const base = getActiveBase();
+      const levelId = `h_${base.techName}_${sectorId}`;
+      navigateTreeLevel(levelId, sectorLabel);
     }
 
     // Inicialização
     document.addEventListener('DOMContentLoaded', () => {
-      lucide.createIcons();
-      renderSectorsGrid();
-      updateNavBadges();
-      if (!getApiKey()) {
-        openAuthModal();
+      // Checa parâmetro de URL para seleção inicial de base
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlBase = urlParams.get('base');
+      if (urlBase && SURVEY_BASES[urlBase]) {
+        activeBaseKey = urlBase;
+      }
+      document.getElementById('selectActiveBase').value = activeBaseKey;
+
+      const urlKey = urlParams.get('apikey');
+      const urlUser = urlParams.get('userid') || urlParams.get('user');
+      if (urlKey) {
+        localStorage.setItem(`tgi_api_key_${activeBaseKey}`, urlKey);
+      }
+      if (urlUser) {
+        localStorage.setItem(`tgi_user_id_${activeBaseKey}`, urlUser);
+      }
+
+      renderBaseData();
+      renderCuratedCategoryPills();
+      renderCuratedVariables();
+
+      const key = getApiKey(activeBaseKey);
+      if (!key) {
+        openAuthModal(activeBaseKey);
       } else {
         loadSurveyInfo();
         executeExpression();
