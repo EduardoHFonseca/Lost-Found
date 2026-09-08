@@ -491,8 +491,72 @@
       <div class="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <!-- Input Form -->
         <div class="lg:col-span-5 space-y-4">
+
+          <!-- Box 1: Consulta em Linguagem Natural (Assistente Semântico) -->
+          <div class="bg-slate-900/90 border border-slate-700/80 hover:border-orange-500/50 rounded-2xl p-4 transition space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="p-1 rounded-lg bg-orange-500/10 text-orange-400">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                </span>
+                <label for="inputNaturalLanguage" class="text-xs font-bold text-white uppercase tracking-wider">
+                  Consulta em Linguagem Natural
+                </label>
+              </div>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/30 font-medium">
+                Tradutor Booleano
+              </span>
+            </div>
+
+            <div class="relative">
+              <textarea id="inputNaturalLanguage" rows="2" 
+                class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition resize-none" 
+                placeholder="Ex: Quero saber mulheres entre 25-40 anos, de São Paulo ou Recife, que assistem streaming"
+                onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); translateAndExecuteNaturalLanguage(); }"></textarea>
+            </div>
+
+            <!-- Sugestões Rápidas (Chips) -->
+            <div class="flex flex-wrap items-center gap-1.5 text-[10px]">
+              <span class="text-slate-400">Exemplos:</span>
+              <button type="button" onclick="setNaturalLanguagePreset('Mulheres entre 25-40 anos de São Paulo ou Recife que assistem streaming')" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition">
+                Mulheres 25-40 SP/Recife Streaming
+              </button>
+              <button type="button" onclick="setNaturalLanguagePreset('Homens classe AB em São Paulo que ouvem Spotify')" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition">
+                Homens Classe AB SP Spotify
+              </button>
+              <button type="button" onclick="setNaturalLanguagePreset('Jovens solteiros de 20 a 34 anos que assistem Netflix')" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition">
+                Jovens 20-34 Netflix Solteiros
+              </button>
+            </div>
+
+            <!-- Botões de Ação do Tradutor -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button type="button" onclick="translateNaturalLanguageToExpression(false)" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-medium transition border border-slate-700 flex items-center justify-center space-x-1.5">
+                <i data-lucide="arrow-down" class="w-3.5 h-3.5 text-orange-400"></i>
+                <span>Traduzir Lógica</span>
+              </button>
+              <button type="button" onclick="translateNaturalLanguageToExpression(true)" class="px-3 py-2 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white rounded-xl text-xs font-semibold transition shadow-md shadow-orange-600/20 flex items-center justify-center space-x-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>Traduzir & Consultar</span>
+              </button>
+            </div>
+
+            <!-- Feedback dos Termos Mapeados -->
+            <div id="nlFeedbackCard" class="hidden bg-slate-950/90 border border-slate-800 rounded-xl p-2.5 text-[11px] space-y-1.5">
+              <div class="text-[10px] uppercase font-bold text-slate-400 flex items-center justify-between">
+                <span>Variáveis Mapeadas:</span>
+                <span id="nlFeedbackCount" class="text-orange-400 font-mono">0 encontradas</span>
+              </div>
+              <div id="nlFeedbackBadges" class="flex flex-wrap gap-1.5"></div>
+            </div>
+          </div>
+
+          <!-- Box 2: Expressão Booleana Oficial Target Group Index -->
           <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Código da Expressão Target Group Index</label>
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">Código da Expressão Booleana Oficial</label>
+              <span class="text-[10px] text-slate-400 font-mono">POST /report/expression</span>
+            </div>
             <div class="relative">
               <input type="text" id="inputExpression" value="MDPDECCA" onkeydown="if(event.key === 'Enter') executeExpression()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-mono text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500" placeholder="Ex: MDPDECCA ou DBSEXLME">
               <span id="exprLabelHelper" class="absolute right-3 top-2.5 text-xs text-slate-400">Casado(a)</span>
@@ -1234,6 +1298,252 @@
         }
       } catch (err) {
         console.warn('API fetch survey info fallback', err);
+      }
+    }
+
+    // ==========================================
+    // TRADUTOR DE LINGUAGEM NATURAL PARA EXPRESSÕES BOOLEANAS
+    // ==========================================
+
+    function normalizeNL(text) {
+      return (text || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function setNaturalLanguagePreset(query) {
+      const input = document.getElementById('inputNaturalLanguage');
+      if (input) {
+        input.value = query;
+        translateNaturalLanguageToExpression(true);
+      }
+    }
+
+    function translateAndExecuteNaturalLanguage() {
+      translateNaturalLanguageToExpression(true);
+    }
+
+    function translateNaturalLanguageToExpression(autoExecute = false) {
+      const input = document.getElementById('inputNaturalLanguage');
+      const text = (input ? input.value : '').trim();
+      if (!text) {
+        alert('Por favor, digite uma consulta em linguagem natural antes de traduzir.');
+        return;
+      }
+
+      const norm = normalizeNL(text);
+      const clauses = [];
+      const matches = [];
+
+      // 1. Gênero
+      if (/\b(mulher|mulheres|feminino|mulherada|meninas|garotas)\b/.test(norm)) {
+        clauses.push('MDPDSXFM');
+        matches.push({ label: 'Gênero: Mulheres', keyword: 'MDPDSXFM' });
+      } else if (/\b(homem|homens|masculino|homarada|meninos|garotos)\b/.test(norm)) {
+        clauses.push('MDPDSXMS');
+        matches.push({ label: 'Gênero: Homens', keyword: 'MDPDSXMS' });
+      }
+
+      // 2. Faixa Etária Padrão do Instituto (12-19, 20-24, 25-34, 35-44, 45-54, 55-64, 65-75)
+      const standardBrackets = [
+        { min: 12, max: 19, code: 'MDPDRE12', label: '12-19 anos' },
+        { min: 20, max: 24, code: 'MDPDRE20', label: '20-24 anos' },
+        { min: 25, max: 34, code: 'MDPDRE25', label: '25-34 anos' },
+        { min: 35, max: 44, code: 'MDPDRE35', label: '35-44 anos' },
+        { min: 45, max: 54, code: 'MDPDRE45', label: '45-54 anos' },
+        { min: 55, max: 64, code: 'MDPDRE55', label: '55-64 anos' },
+        { min: 65, max: 75, code: 'MDPDRE65', label: '65-75 anos' }
+      ];
+
+      const rangeMatch = norm.match(/(?:entre|de)?\s*(\d{2})\s*(?:a|ate|e|-)\s*(\d{2})\s*(?:anos)?/);
+      const aboveMatch = norm.match(/(?:mais de|acima de|maiores de|a partir de)\s*(\d{2})\s*(?:anos)?/);
+      const belowMatch = norm.match(/(?:menos de|abaixo de|menores de|ate)\s*(\d{2})\s*(?:anos)?/);
+
+      if (rangeMatch) {
+        let mn = parseInt(rangeMatch[1]);
+        let mx = parseInt(rangeMatch[2]);
+        if (mn > mx) { const t = mn; mn = mx; mx = t; }
+        const matchedBrackets = standardBrackets.filter(b => mx >= b.min && mn <= b.max);
+        if (matchedBrackets.length > 0) {
+          const bExpr = matchedBrackets.length === 1 
+            ? matchedBrackets[0].code 
+            : `(${matchedBrackets.map(b => b.code).join(' OR ')})`;
+          clauses.push(bExpr);
+          matches.push({ 
+            label: `Idades: ${mn}-${mx}a (${matchedBrackets.map(b => b.label).join(', ')})`, 
+            keyword: bExpr 
+          });
+        }
+      } else if (aboveMatch) {
+        const mn = parseInt(aboveMatch[1]);
+        const matchedBrackets = standardBrackets.filter(b => b.max >= mn);
+        if (matchedBrackets.length > 0) {
+          const bExpr = matchedBrackets.length === 1 
+            ? matchedBrackets[0].code 
+            : `(${matchedBrackets.map(b => b.code).join(' OR ')})`;
+          clauses.push(bExpr);
+          matches.push({ label: `Idades: >${mn}a (${matchedBrackets.map(b => b.label).join(', ')})`, keyword: bExpr });
+        }
+      } else if (belowMatch) {
+        const mx = parseInt(belowMatch[1]);
+        const matchedBrackets = standardBrackets.filter(b => b.min <= mx);
+        if (matchedBrackets.length > 0) {
+          const bExpr = matchedBrackets.length === 1 
+            ? matchedBrackets[0].code 
+            : `(${matchedBrackets.map(b => b.code).join(' OR ')})`;
+          clauses.push(bExpr);
+          matches.push({ label: `Idades: <${mx}a (${matchedBrackets.map(b => b.label).join(', ')})`, keyword: bExpr });
+        }
+      } else if (/\b(jovens|adolescentes)\b/.test(norm)) {
+        clauses.push('(MDPDRE12 OR MDPDRE20)');
+        matches.push({ label: 'Idades: Jovens (12 a 24 anos)', keyword: '(MDPDRE12 OR MDPDRE20)' });
+      } else if (/\b(idosos|terceira idade)\b/.test(norm)) {
+        clauses.push('MDPDRE65');
+        matches.push({ label: 'Idades: Idosos (65 a 75 anos)', keyword: 'MDPDRE65' });
+      }
+
+      // 3. Regiões / Mercados Metropolitanos
+      const cityDictionary = [
+        { pattern: /\b(sao paulo|sp|paulista|sampa)\b/, code: 'SAOPAULO', name: 'RM São Paulo' },
+        { pattern: /\b(recife|pe|pernambuco)\b/, code: 'RECIFE', name: 'RM Recife' },
+        { pattern: /\b(rio de janeiro|rj|carioca|rio)\b/, code: 'RIODEJAN', name: 'RM Rio de Janeiro' },
+        { pattern: /\b(belo horizonte|bh|mg)\b/, code: 'BELOHOR', name: 'RM Belo Horizonte' },
+        { pattern: /\b(curitiba|pr|parana)\b/, code: 'CURITIBA', name: 'RM Curitiba' },
+        { pattern: /\b(porto alegre|poa|rs|gaucho|gaucha)\b/, code: 'PORTOALE', name: 'RM Porto Alegre' },
+        { pattern: /\b(salvador|ssa|ba|bahia)\b/, code: 'SALVADOR', name: 'RM Salvador' },
+        { pattern: /\b(fortaleza|ce|ceara)\b/, code: 'FORTALEZ', name: 'RM Fortaleza' },
+        { pattern: /\b(campinas)\b/, code: '16W2535462', name: 'RM Campinas' },
+        { pattern: /\b(brasilia|df|distrito federal)\b/, code: 'BRASILIA', name: 'Brasília / DF' }
+      ];
+
+      const matchedCities = cityDictionary.filter(c => c.pattern.test(norm));
+      if (matchedCities.length > 0) {
+        if (matchedCities.length === 1) {
+          clauses.push(matchedCities[0].code);
+          matches.push({ label: matchedCities[0].name, keyword: matchedCities[0].code });
+        } else {
+          const cExpr = `(${matchedCities.map(c => c.code).join(' OR ')})`;
+          clauses.push(cExpr);
+          matches.push({ label: matchedCities.map(c => c.name).join(' ou '), keyword: cExpr });
+        }
+      }
+
+      // 4. Classes Sociais / Critério Brasil (NSE)
+      if (/\b(classe ab|classes ab|classes a e b|a e b|alta renda)\b/.test(norm)) {
+        clauses.push('NSEBRA01');
+        matches.push({ label: 'Classe AB (Total)', keyword: 'NSEBRA01' });
+      } else if (/\b(classe a)\b/.test(norm)) {
+        clauses.push('O31982684');
+        matches.push({ label: 'Classe A', keyword: 'O31982684' });
+      } else if (/\b(classe b)\b/.test(norm)) {
+        clauses.push('O31982685');
+        matches.push({ label: 'Classe B', keyword: 'O31982685' });
+      } else if (/\b(classe c|classes c|media renda)\b/.test(norm)) {
+        clauses.push('NSEBRA02');
+        matches.push({ label: 'Classe C', keyword: 'NSEBRA02' });
+      } else if (/\b(classe de|classes de|classes d e e|classe d|classe e|baixa renda)\b/.test(norm)) {
+        clauses.push('NSEBRA03');
+        matches.push({ label: 'Classe DE', keyword: 'NSEBRA03' });
+      }
+
+      // 5. Estado Civil
+      if (/\b(casado|casada|casados|casadas)\b/.test(norm)) {
+        clauses.push('MDPDECCA');
+        matches.push({ label: 'Casado(a)', keyword: 'MDPDECCA' });
+      } else if (/\b(solteiro|solteira|solteiros|solteiras)\b/.test(norm)) {
+        clauses.push('MDPDECSO');
+        matches.push({ label: 'Solteiro(a)', keyword: 'MDPDECSO' });
+      } else if (/\b(uniao estavel|companheiro|companheira)\b/.test(norm)) {
+        clauses.push('MDPDECEP');
+        matches.push({ label: 'União Estável', keyword: 'MDPDECEP' });
+      } else if (/\b(viuvo|viuva|viuvos|viuvas)\b/.test(norm)) {
+        clauses.push('MDPDECVI');
+        matches.push({ label: 'Viúvo(a)', keyword: 'MDPDECVI' });
+      } else if (/\b(divorciado|divorciada|separado|separada)\b/.test(norm)) {
+        clauses.push('(MDPDECDI OR MDPDECSE)');
+        matches.push({ label: 'Divorciado(a)/Separado(a)', keyword: '(MDPDECDI OR MDPDECSE)' });
+      }
+
+      // 6. Plataformas de Streaming & Meios
+      if (/\b(spotify)\b/.test(norm)) {
+        clauses.push('B221538003');
+        matches.push({ label: 'Spotify (U30d)', keyword: 'B221538003' });
+      }
+      if (/\b(netflix)\b/.test(norm)) {
+        clauses.push('14W155621113');
+        matches.push({ label: 'Netflix (U30d)', keyword: '14W155621113' });
+      }
+      if (/\b(prime video|amazon prime)\b/.test(norm)) {
+        clauses.push('18W1767682');
+        matches.push({ label: 'Prime Video (U30d)', keyword: '18W1767682' });
+      }
+      if (/\b(disney|disney\+)\b/.test(norm)) {
+        clauses.push('22W1536487');
+        matches.push({ label: 'Disney+ (U30d)', keyword: '22W1536487' });
+      }
+      if (/\b(globoplay|globo play)\b/.test(norm)) {
+        clauses.push('17W1536438');
+        matches.push({ label: 'Globoplay (U30d)', keyword: '17W1536438' });
+      }
+      if (/\b(hbo|hbo max|max)\b/.test(norm)) {
+        clauses.push('17W1768326');
+        matches.push({ label: 'HBO Max (U30d)', keyword: '17W1768326' });
+      }
+      if (/\b(youtube premium)\b/.test(norm)) {
+        clauses.push('B231575118');
+        matches.push({ label: 'YouTube Premium (U30d)', keyword: 'B231575118' });
+      }
+
+      const specificVideoStreaming = /\b(netflix|prime video|amazon prime|disney|globoplay|globo play|hbo|max|youtube premium)\b/.test(norm);
+      if (!specificVideoStreaming && /\b(streaming|stream|assisntem|assistem|assistir|video streaming|streaming pago)\b/.test(norm)) {
+        clauses.push('14W157052183');
+        matches.push({ label: 'Vídeo Streaming Pago (U30d)', keyword: '14W157052183' });
+      }
+      if (!norm.includes('spotify') && /\b(musica|ouvir musica|streaming de musica|podcasts)\b/.test(norm)) {
+        clauses.push('B221542445');
+        matches.push({ label: 'Música Streaming (Costuma Ouvir)', keyword: 'B221542445' });
+      }
+
+      if (clauses.length === 0) {
+        alert('Não foi possível identificar variáveis oficiais do Target Group Index no texto. Tente especificar gênero (ex: mulheres), faixas de idade (ex: 25 a 40 anos), cidades (ex: São Paulo ou Recife) ou plataformas de streaming.');
+        return;
+      }
+
+      const fullExpression = clauses.join(' AND ');
+
+      // Atualiza o input de expressão técnica
+      const exprInput = document.getElementById('inputExpression');
+      if (exprInput) {
+        exprInput.value = fullExpression;
+      }
+      const helper = document.getElementById('exprLabelHelper');
+      if (helper) {
+        helper.innerText = 'Traduzido via IA';
+      }
+
+      // Renderiza feedback visual
+      const card = document.getElementById('nlFeedbackCard');
+      const countEl = document.getElementById('nlFeedbackCount');
+      const badgesEl = document.getElementById('nlFeedbackBadges');
+      if (card && countEl && badgesEl) {
+        card.classList.remove('hidden');
+        countEl.innerText = `${matches.length} variáveis mapeadas`;
+        badgesEl.innerHTML = matches.map(m => `
+          <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-slate-900 border border-slate-700 text-slate-200">
+            <span class="text-orange-400 font-mono font-bold">${m.keyword}</span>
+            <span class="text-slate-500">&bull;</span>
+            <span class="text-slate-300">${m.label}</span>
+          </span>
+        `).join('');
+      }
+
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+
+      if (autoExecute) {
+        executeExpression();
       }
     }
 

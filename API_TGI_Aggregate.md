@@ -110,10 +110,11 @@ Módulo analítico e integrador para consumo dos serviços da **TGI Cloud Servic
 
 - **Hospedagem Estática:** Publicado no **here.now**.
 - **URLs Ativas:**
-  - Versão Atual (Target Group Index / Sem Sigla TGI / Open Graph Tags): [https://indigo-raven-42ar.here.now/](https://indigo-raven-42ar.here.now/)
-  - Versões Anteriores: [https://spruce-riddle-dwmd.here.now/](https://spruce-riddle-dwmd.here.now/) | [https://supple-tassel-q97y.here.now/](https://supple-tassel-q97y.here.now/) | [https://plush-bloom-5dp2.here.now/](https://plush-bloom-5dp2.here.now/)
+  - Versão Atual (Target Group Index / Sem Sigla TGI / Open Graph Tags): [https://sleek-pillar-9xqq.here.now/](https://sleek-pillar-9xqq.here.now/)
+  - Versões Anteriores: [https://indigo-raven-42ar.here.now/](https://indigo-raven-42ar.here.now/) | [https://spruce-riddle-dwmd.here.now/](https://spruce-riddle-dwmd.here.now/) | [https://supple-tassel-q97y.here.now/](https://supple-tassel-q97y.here.now/)
 - **Código Fonte do Dashboard:** Localizado em `api-tgi-aggregate/index.html`.
 - **Recursos do Dashboard:**
+  - **Tradutor Semântico de Linguagem Natural:** Caixa de entrada em linguagem natural que converte frases livres em português para expressões booleanas formais da pesquisa, com suporte a faixas etárias padrão do instituto (`MDPDRE12` a `MDPDRE65`), regiões metropolitanas agrupadas com `OR`, classes sociais (NSE), plataformas de streaming e marcas (Netflix, Prime Video, Disney+, Globoplay, HBO Max, YouTube Premium, Spotify), gerando tags de mapeamento visual e permitindo tradução direta ou execução instantânea via atalho `Enter`.
   - Seletor rápido de base ativa no topo (`BASE TRIAL BRASIL` vs `TG BR 2023 R3`).
   - Atualização instantânea de metadados, Universo Populacional, amostras e unidades amostrais.
   - Card dedicado de Streaming com abertura automática de dados de gênero (% Homens / % Mulheres), distribuição e benchmarks (Netflix e Spotify) ajustados para a base selecionada.
@@ -137,13 +138,17 @@ Módulo analítico e integrador para consumo dos serviços da **TGI Cloud Servic
 
 ## 8. Backlog do Projeto (Próximas Fases)
 
-### Entregas Realizadas (04-Set-2026):
+### Entregas Realizadas (08-Set-2026):
+- [x] **Assistente Semântico de Linguagem Natural:** Implementação da segunda caixa de entrada com tradução léxica automática de consultas livres em português (gênero, faixas padrão do instituto, agrupamento de cidades e plataformas de streaming) para sintaxe booleana oficial (`AND`, `OR`).
+- [x] **Chips de Presets e Atalhos:** Exemplos de 1 clique e execução rápida (`Enter`) ou preenchimento com feedback visual de variáveis mapeadas.
+- [x] **Deploy Atualizado no here.now:** Atualização in-place mantendo a mesma URL de sessão [https://sleek-pillar-9xqq.here.now/](https://sleek-pillar-9xqq.here.now/).
+
+### Entregas Realizadas Anteriores (04-Set-2026):
 - [x] **Suporte Multi-Base Homologado:** Operação validada em tempo real para Base 1 (`treinamento2_p` / `_TGI_Latina`) e Base 2 (`2023r3_p` / `LAT_Trial_Teste`).
 - [x] **Tratamento Avançado de Erros:** Interceptação do código de erro interno `401.01` da TGI API (retornado sob HTTP 200) com mensagens diagnósticas precisas por base e usuário.
 - [x] **Dicionário e Árvore Integrados:** 30+ variáveis catalogadas com 1 clique (`Usar` e `+ AND`) e navegador hierárquico oficial `/dictionary` e `/question`.
 - [x] **Carregamento Multi-Credenciais:** Suporte a ingestão simultânea de chaves de ambas as bases via parâmetros de URL (`apikey_base1` e `apikey_base2`).
 - [x] **Adequação de Nomenclatura (Target Group Index):** Remoção total da sigla "TGI" de todas as áreas visíveis ao cliente externo (título da página, Open Graph tags para thumbnail, navbar, banners, metadados, cards e rodapé).
-- [x] **Publicação Atualizada:** Deploy ativo em [https://indigo-raven-42ar.here.now/](https://indigo-raven-42ar.here.now/).
 
 ### Próximos Passos:
 - [ ] **Validação de Segurança:** Executar varredura automatizada contra vazamento de credenciais antes de qualquer publicação em ambiente produtivo.
